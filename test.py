@@ -1,47 +1,43 @@
-from datetime import timedelta, datetime
+import os
+from dataclasses import dataclass
+import datetime as dt
 
 import mysql
 from mysql.connector import cursor
-
 import psutil
 
-import os
 
-import MyDb
-
-
-class Process():
+@dataclass
+class Process:
     name: str
     proc_id: str
     status: str
     started: str
 
-    def __init__(self, name, proc_id, status, start_time):
-        self.name = name
-        self.proc_id = proc_id
-        self.status = status
-        self.started = start_time
+
+def mydb_connection() -> mysql.connector:
+    return mysql.connector.connect(
+        host="localhost",
+        user=os.environ["db_user"],
+        password=os.environ["db_pword"],
+        database=os.environ["db"]
+    )
+
+
+def add_process_to_db(func_proc: Process, func_mydb: mysql.connector, func_cursor: mysql.connector.cursor):
+    func_cursor.execute(
+        "INSERT INTO processes(name, proc_id, status, started) "
+        "Values(%s,%s,%s,%s)", (func_proc.name, func_proc.proc_id, func_proc.status, func_proc.started))
+    func_mydb.commit()
 
 
 if __name__ == "__main__":
 
     procs = {p for p in psutil.process_iter(['name', 'pid', 'status'])}
-    print(procs)
-    my_cursor: cursor
 
-    mydb = mysql.connector.connect(
-        host="localhost",
-        user="jnor42",
-        password=os.environ["db_pword"],
-        database="os_monitoring_tool"
-    )
-
+    mydb = mydb_connection()
     my_cursor = mydb.cursor()
 
     for p in procs:
-        proc = Process(p.name(), p.pid, p.status(), timedelta(seconds=p.create_time()))
-        my_cursor.execute(
-            "INSERT INTO processes(name, proc_id, status, started) "
-            "Values(%s,%s,%s,%s)", (proc.name, proc.proc_id, proc.status, proc.started))
-        mydb.commit()
-        # MyDb.add_process(p.name(), p.pid, p.status(), p.create_time())
+        proc = Process(p.name(), p.pid, p.status(), dt.datetime.fromtimestamp(p.create_time()))
+        add_process_to_db(proc, mydb, my_cursor)

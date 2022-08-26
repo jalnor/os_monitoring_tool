@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "os_monitoring_tool"
+version = "0.1.0"
+description = "A tool to monitor the processes running or stopped on an operating system"
+authors = ["jalnor <31383711+jalnor@users.noreply.github.com>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+mysql-connector-python = "~=8.0.30"
+psutil = "~=5.9.1"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

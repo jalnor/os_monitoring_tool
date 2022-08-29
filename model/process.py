@@ -12,18 +12,18 @@ from model.startstoptimes import StartStopTimes
 def get_processes() -> list[list[str]]:
     # processes_from_db = myDb.get_all_processes()
     procs = {p for p in psutil.process_iter(['name', 'pid', 'status'])}
-    print(procs)
+    # print(procs)
     process_str = []
     for p in procs:
-        print(p.create_time())
+        # print(p.create_time())
         # Check if process still exists
         try:
             proc = Process(p.name(), p.pid, p.status())
-            new_time = dt.datetime.fromtimestamp(p.create_time())
-            new_date = str(dt.datetime.now()).split(" ")[0]
-            # started = StartStopTimes.started(time.time())
-            # start_date = StartStopDates.start_date()
-            process_str.append((proc.name, proc.proc_id, proc.status, new_time, 0, new_date, 0))
+            started = StartStopTimes(dt.datetime.fromtimestamp(p.create_time()), dt.datetime.fromtimestamp(0))
+            start_date = StartStopDates(dt.date.today(),
+                                        dt.date.today(), dt.date(1900, 1, 1))
+            process_str.append((proc.name, proc.proc_id, proc.status, started.started, started.stopped,
+                                start_date.capture_date, start_date.start_date, start_date.stop_date))
         except psutil.NoSuchProcess:
             pass
 

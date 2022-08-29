@@ -7,12 +7,12 @@ from sqlmodel import Field, SQLModel
 
 class StartStopTimes(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key="process.id")
-    started: dt.time
-    stopped: dt.time
+    started: dt.datetime
+    stopped: dt.datetime
 
-    def __init__(self):
-        self.started = None
-        self.stopped = None
+    def __init__(self, start, stop):
+        self.started = start
+        self.stopped = stop
 
     # @property
     # def started(self):

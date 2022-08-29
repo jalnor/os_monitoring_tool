@@ -11,10 +11,10 @@ class StartStopDates(SQLModel, table=True):
     start_date: dt.date
     stop_date: dt.date
 
-    def __init__(self):
-        self.capture_date = None
-        self.start_date = None
-        self.stop_date = None
+    def __init__(self, cd, start_d, stop_d):
+        self.capture_date = cd
+        self.start_date = start_d
+        self.stop_date = stop_d
 
     # @property
     # def capture_date(self):

@@ -82,7 +82,8 @@ def sortby(tree, col, descending):
 
 
 # the test data ...
-process_header = ['Name', 'Process Id', 'Status', 'Start Time', 'Stop Time', 'Start Date', 'Stop Date']
+process_header = ['Name', 'Process Id', 'Status', 'Start Time', 'Stop Time', 'Capture Date',
+                  'Start Date', 'Stop Date']
 procs = process.get_processes()
 car_header = ['car', 'repair']
 car_list = [

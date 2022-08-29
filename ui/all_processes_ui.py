@@ -4,16 +4,10 @@ with adjustable column width and column-header-click sorting.
 Obtained from StackOverflow @https://stackoverflow.com/questions/5286093/display-listbox-with-columns-using-tkinter
 and was originally taken from @https://www.daniweb.com/programming/software-development/threads/350266/creating-table-in-python
 '''
-from model import process
+import tkinter.font as tkFont
+import tkinter.ttk as ttk
 
-try:
-    import Tkinter as tk
-    import tkFont
-    import ttk
-except ImportError:  # Python 3
-    import tkinter as tk
-    import tkinter.font as tkFont
-    import tkinter.ttk as ttk
+from db import models
 
 
 class AllProcesses(object):
@@ -84,7 +78,7 @@ def sortby(tree, col, descending):
 # the test data ...
 process_header = ['Name', 'Process Id', 'Status', 'Start Time', 'Stop Time', 'Capture Date',
                   'Start Date', 'Stop Date']
-procs = process.get_processes()
+procs = models.get_processes()
 car_header = ['car', 'repair']
 car_list = [
 ('Hyundai', 'brakes') ,

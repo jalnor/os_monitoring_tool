@@ -1,11 +1,7 @@
-from model.process import get_processes
+import tkinter as tk
+import tkinter.ttk as ttk
+
 from ui.all_processes_ui import AllProcesses
-try:
-    import Tkinter as tk
-    import ttk
-except:
-    import tkinter as tk
-    import tkinter.ttk as ttk
 
 
 def create_notebook(parent):
@@ -19,11 +15,29 @@ def create_notebook(parent):
     AllProcesses(all_processes_frame)
 
 
+def create_menubar(parent):
+    win = tk.Toplevel(parent)
+    menubar = tk.Menu(win)
+    win['menu'] = menubar
+    # Add menus
+    menu_file = tk.Menu(menubar)
+    menu_edit = tk.Menu(menubar)
+    menubar.add_cascade(menu=menu_file, label='File')
+    menubar.add_cascade(menu=menu_edit, label='Edit')
+    # Add additional menus
+    menu_file.add_command(label='New', command='newFile')
+    menu_file.add_command(label='Open...', command='openFile')
+    menu_file.add_command(label='Close', command='closeFile')
+
+
 class MainUi:
     root = tk.Tk()
+    root.option_add('*tearOFF', False)
     root.geometry('1000x550')
     root.title('OS Monitoring Tool')
-    bt = tk.Button(root, text="Get Processes", command=get_processes)
+
+    create_menubar(root)
+
     create_notebook(root)
     root.mainloop()
 

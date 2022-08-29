@@ -1,12 +1,11 @@
-import time
 from typing import Optional, List
 import datetime as dt
 
 import psutil
 from sqlmodel import SQLModel, Field
 
-from model.startstopdates import StartStopDates
-from model.startstoptimes import StartStopTimes
+# from model.startstopdates import StartStopDates
+# from model.startstoptimes import StartStopTimes
 
 
 def get_processes() -> list[list[str]]:
@@ -41,3 +40,24 @@ class Process(SQLModel, table=True):
         self.proc_id = proc_id
         self.status = status
 
+
+class StartStopTimes(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key="process.id")
+    started: dt.datetime
+    stopped: dt.datetime
+
+    def __init__(self, start, stop):
+        self.started = start
+        self.stopped = stop
+
+
+class StartStopDates(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key="process.id")
+    capture_date: dt.date
+    start_date: dt.date
+    stop_date: dt.date
+
+    def __init__(self, cd, start_d, stop_d):
+        self.capture_date = cd
+        self.start_date = start_d
+        self.stop_date = stop_d

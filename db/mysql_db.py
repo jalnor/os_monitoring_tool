@@ -1,20 +1,17 @@
-import mysql.connector
-from mysql.connector import cursor
 import os
-import test
+import mysql.connector
 
 
 class MyDb:
 
     def __init__(self):
-        mydb = mysql.connector.connect(
+        self.my_db = mysql.connector.connect(
             host="localhost",
             user=os.environ["db_user"],
             password=os.environ["db_pword"],
             database=os.environ["db"]
         )
-        my_cursor = self.mydb.cursor()
-        print('In there')
+        self.my_cursor = self.my_db.cursor()
         self.setup_table()
 
     def setup_table(self):
@@ -24,6 +21,7 @@ class MyDb:
 
     def add_process(self, proc):
         self.my_cursor.execute(
-                "INSERT INTO processes(name, proc_id, status, started) "
-                "Values(%s,%s,%s,%s)", (proc.name, proc.proc_id, proc.status, proc.started))
-        self.mydb.commit()
+            "INSERT INTO processes(name, proc_id, status, started, stopped, start_date, stop_date) "
+            "Values(%s,%s,%s,%s,%s,%s,%s)", (proc.name, proc.proc_id, proc.status, proc.started, proc.stopped,
+                                             proc.start_date, proc.stop_date))
+        self.my_db.commit()

@@ -9,6 +9,7 @@ license = "MIT"
 python = "^3.10"
 mysql-connector-python = "~=8.0.30"
 psutil = "~=5.9.1"
+sqlmodel = "^0.0.6"
 
 [tool.poetry.dev-dependencies]
 

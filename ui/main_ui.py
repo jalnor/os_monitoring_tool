@@ -7,21 +7,20 @@ from ui.all_processes_ui import AllProcesses
 def create_notebook(parent):
     n = ttk.Notebook(parent)
     n.pack(pady=10, expand=True)
-    f1 = ttk.Frame(n, width=1000, height=480)
-    f2 = ttk.Frame(n, width=1000, height=480)
+    f1 = ttk.Frame(n, width=1000, height=450)
+    f2 = ttk.Frame(n, width=1000, height=450)
     n.add(f1, text='All Processes')
     n.add(f2, text='Process')
-    all_processes_frame = ttk.Frame(f1, width=780, height=500, relief='sunken')
+    all_processes_frame = ttk.Frame(f1, width=780, height=450, relief='sunken')
     AllProcesses(all_processes_frame)
 
 
-def create_menubar(parent):
-    win = tk.Toplevel(parent)
-    menubar = tk.Menu(win)
-    win['menu'] = menubar
+def create_menubar(parent) -> tk.Menu:
+
+    menubar = tk.Menu(parent)
     # Add menus
-    menu_file = tk.Menu(menubar)
-    menu_edit = tk.Menu(menubar)
+    menu_file = tk.Menu(menubar, tearoff=0)
+    menu_edit = tk.Menu(menubar, tearoff=0)
     menubar.add_cascade(menu=menu_file, label='File')
     menubar.add_cascade(menu=menu_edit, label='Edit')
     # Add additional menus
@@ -29,15 +28,15 @@ def create_menubar(parent):
     menu_file.add_command(label='Open...', command='openFile')
     menu_file.add_command(label='Close', command='closeFile')
 
+    return menubar
+
 
 class MainUi:
     root = tk.Tk()
-    root.option_add('*tearOFF', False)
     root.geometry('1000x550')
     root.title('OS Monitoring Tool')
-
-    create_menubar(root)
+    menubar = create_menubar(root)
 
     create_notebook(root)
+    root.configure(menu=menubar)
     root.mainloop()
-

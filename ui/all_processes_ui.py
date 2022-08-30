@@ -13,19 +13,19 @@ from db import models
 class AllProcesses(object):
     """use a ttk.TreeView as a multicolumn ListBox"""
 
-    def __init__(self, f):
+    def __init__(self, all_processes_frame):
         self.tree = None
-        self._setup_widgets(f)
+        self._setup_widgets(all_processes_frame)
         self._build_tree()
 
-    def _setup_widgets(self, f):
+    def _setup_widgets(self, all_processes_frame):
         s = """\click on header to sort by that column
 to change width of column drag boundary
         """
         msg = ttk.Label(wraplength="4i", justify="left", anchor="n",
                         padding=(10, 2, 10, 6), text=s)
         msg.pack(fill='x')
-        container = f
+        container = all_processes_frame
         container.pack(fill='both', expand=True)
         # create a treeview with dual scrollbars
         self.tree = ttk.Treeview(columns=process_header, show="headings")

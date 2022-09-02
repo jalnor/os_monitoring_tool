@@ -7,25 +7,26 @@ and was originally taken from @https://www.daniweb.com/programming/software-deve
 import tkinter.font as tkFont
 import tkinter.ttk as ttk
 
-from db import models
+from db.sqlite_db import MySqliteDb
 
 
 class AllProcesses(object):
     """use a ttk.TreeView as a multicolumn ListBox"""
 
-    def __init__(self, all_processes_frame):
+    def __init__(self, all_process_frame):
         self.tree = None
-        self._setup_widgets(all_processes_frame)
+        self.all_process_frame = all_process_frame
+        self._setup_widgets()
         self._build_tree()
 
-    def _setup_widgets(self, all_processes_frame):
-        s = """\click on header to sort by that column
+    def _setup_widgets(self):
+        s = """click on header to sort by that column
 to change width of column drag boundary
         """
         msg = ttk.Label(wraplength="4i", justify="left", anchor="n",
                         padding=(10, 2, 10, 6), text=s)
         msg.pack(fill='x')
-        container = all_processes_frame
+        container = self.all_process_frame
         container.pack(fill='both', expand=True)
         # create a treeview with dual scrollbars
         self.tree = ttk.Treeview(columns=process_header, show="headings")
@@ -50,7 +51,6 @@ to change width of column drag boundary
                              width=tkFont.Font().measure(col.title()))
 
         for item in procs:
-            # self.tree.insert('', 'end', values=str(item).split(","))
             self.tree.insert('', 'end', values=item)
             # adjust column's width if necessary to fit each value
             for ix, val in enumerate(item):
@@ -74,20 +74,9 @@ def sortby(tree, col, descending):
     tree.heading(col, command=lambda col=col: sortby(tree, col, \
                                                      int(not descending)))
 
-
 # the test data ...
 process_header = ['Name', 'Process Id', 'Status', 'Start Time', 'Stop Time', 'Capture Date',
                   'Start Date', 'Stop Date']
-procs = models.get_processes()
-car_header = ['car', 'repair']
-car_list = [
-('Hyundai', 'brakes') ,
-('Honda', 'light') ,
-('Lexus', 'battery') ,
-('Benz', 'wiper') ,
-('Ford', 'tire') ,
-('Chevy', 'air') ,
-('Chrysler', 'piston') ,
-('Toyota', 'brake pedal') ,
-('BMW', 'seat')
-]
+db = MySqliteDb()
+procs = db.get_all_processes()
+

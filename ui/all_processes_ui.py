@@ -13,21 +13,20 @@ from db.sqlite_db import MySqliteDb
 class AllProcesses(object):
     """use a ttk.TreeView as a multicolumn ListBox"""
 
-    def __init__(self, all_process_frame):
+    def __init__(self, process_container):
         self.tree = None
-        self.all_process_frame = all_process_frame
+        self.process_container = process_container
         self._setup_widgets()
         self._build_tree()
 
     def _setup_widgets(self):
-        s = """click on header to sort by that column
+        information = """click on header to sort by that column
 to change width of column drag boundary
         """
         msg = ttk.Label(wraplength="4i", justify="left", anchor="n",
-                        padding=(10, 2, 10, 6), text=s)
+                        padding=(10, 2, 10, 6), text=information)
         msg.pack(fill='x')
-        container = self.all_process_frame
-        container.pack(fill='both', expand=True)
+        self.process_container.pack(fill='both', expand=True)
         # create a treeview with dual scrollbars
         self.tree = ttk.Treeview(columns=process_header, show="headings")
         vsb = ttk.Scrollbar(orient="vertical",
@@ -36,11 +35,11 @@ to change width of column drag boundary
                             command=self.tree.xview)
         self.tree.configure(yscrollcommand=vsb.set,
                             xscrollcommand=hsb.set)
-        self.tree.grid(column=0, row=0, sticky='nsew', in_=container)
-        vsb.grid(column=1, row=0, sticky='ns', in_=container)
-        hsb.grid(column=0, row=1, sticky='ew', in_=container)
-        container.grid_columnconfigure(0, weight=1)
-        container.grid_rowconfigure(0, weight=1)
+        self.tree.grid(column=0, row=0, sticky='nsew', in_=self.process_container)
+        vsb.grid(column=1, row=0, sticky='ns', in_=self.process_container)
+        hsb.grid(column=0, row=1, sticky='ew', in_=self.process_container)
+        self.process_container.grid_columnconfigure(0, weight=1)
+        self.process_container.grid_rowconfigure(0, weight=1)
 
     def _build_tree(self):
         for col in process_header:
@@ -74,9 +73,9 @@ def sortby(tree, col, descending):
     tree.heading(col, command=lambda col=col: sortby(tree, col, \
                                                      int(not descending)))
 
+
 # the test data ...
-process_header = ['Name', 'Process Id', 'Status', 'Start Time', 'Stop Time', 'Capture Date',
-                  'Start Date', 'Stop Date']
+process_header = ['Name', 'Status', 'Process Id', 'Start Time', 'Stop Time']
 db = MySqliteDb()
 procs = db.get_all_processes()
 

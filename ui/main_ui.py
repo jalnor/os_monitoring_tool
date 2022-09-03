@@ -1,3 +1,4 @@
+import subprocess
 import tkinter as tk
 import tkinter.ttk as ttk
 
@@ -11,8 +12,8 @@ def create_notebook(parent):
     f2 = ttk.Frame(n, width=1000, height=450)
     n.add(f1, text='All Processes')
     n.add(f2, text='Process')
-    all_processes_frame = ttk.Frame(f1, width=780, height=450, relief='sunken')
-    AllProcesses(all_processes_frame)
+    process_container = ttk.Frame(f1, width=780, height=450, relief='sunken')
+    AllProcesses(process_container)
 
 
 def create_menubar(parent) -> tk.Menu:

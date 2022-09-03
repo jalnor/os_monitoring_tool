@@ -16,7 +16,6 @@ def create_notebook(parent):
 
 
 def create_menubar(parent) -> tk.Menu:
-
     menubar = tk.Menu(parent)
     # Add menus
     menu_file = tk.Menu(menubar, tearoff=0)
@@ -36,7 +35,8 @@ class MainUi:
     root.geometry('1000x550')
     root.title('OS Monitoring Tool')
     menubar = create_menubar(root)
-
     create_notebook(root)
     root.configure(menu=menubar)
     root.mainloop()
+
+

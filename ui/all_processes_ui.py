@@ -7,7 +7,7 @@ and was originally taken from @https://www.daniweb.com/programming/software-deve
 import tkinter.font as tkFont
 import tkinter.ttk as ttk
 
-from db.sqlite_db import MySqliteDb
+from db.my_db import MyDb
 
 
 class AllProcesses(object):
@@ -76,6 +76,6 @@ def sortby(tree, col, descending):
 
 # the test data ...
 process_header = ['Name', 'Status', 'Process Id', 'Start Time', 'Stop Time']
-db = MySqliteDb()
+db = MyDb()
 procs = db.get_all_processes()
 

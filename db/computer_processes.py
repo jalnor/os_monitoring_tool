@@ -3,8 +3,11 @@ from datetime import datetime
 
 import psutil
 from sqlmodel import create_engine, SQLModel, Session, select
+from dotenv import load_dotenv
 
 from db.models import Process, LogStartStop
+
+load_dotenv()
 
 
 class ComputerProcesses:
@@ -21,18 +24,24 @@ class ComputerProcesses:
         pass
 
     def check_processes(self):
-        processes = {process for process in psutil.process_iter(['name', 'pid', 'status'])}
+        processes = [process for process in psutil.process_iter(['name', 'pid', 'status'])]
+        new_processes = dict.fromkeys((Process, LogStartStop), processes)
 
         with Session(self.engine) as session:
             results = session.exec(select(Process, LogStartStop).join(LogStartStop)).fetchall()
 
+        new_dict = dict.fromkeys((Process, LogStartStop), results)
+        print(new_processes.values())
         if not results:
             self.add_processes_to_db(processes)
-        else:
-            for result in results:
-                name = result[0].name
-                process = [process for process in processes if process.name() == name].pop(0)
-                print(process)
+
+        print(new_dict.keys() - processes)
+        # else:
+            # print(results-processes)
+            # for result in results:
+                #     name = result[0].name
+                #     process = [process for process in processes if process.name() == name].pop(0)
+                # print(result)
 
         pass
 

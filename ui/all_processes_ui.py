@@ -53,7 +53,8 @@ to change width of column drag boundary
             self.tree.insert('', 'end', values=item)
             # adjust column's width if necessary to fit each value
             for ix, val in enumerate(item):
-                col_w = tkFont.Font().measure(val)
+                if val is not None:
+                    col_w = tkFont.Font().measure(val)
                 if self.tree.column(process_header[ix], width=None) < col_w:
                     self.tree.column(process_header[ix], width=col_w)
 

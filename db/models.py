@@ -8,8 +8,8 @@ from sqlmodel import SQLModel, Field
 class LogStartStop(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     proc_id: str
-    started: datetime
-    stopped: datetime
+    started: Optional[datetime] = None
+    stopped: Optional[datetime] = None
     process_id: int = Field(default=None, foreign_key="process.id")
 
 

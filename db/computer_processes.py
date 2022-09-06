@@ -25,51 +25,47 @@ class ComputerProcesses:
 
     def check_processes(self):
         processes = [process for process in psutil.process_iter(['name', 'pid', 'status'])]
-        new_processes = dict.fromkeys((Process, LogStartStop), processes)
+        # new_processes = dict.fromkeys(('name', 'pid', 'status', 'create_time'), processes)
 
         with Session(self.engine) as session:
             results = session.exec(select(Process, LogStartStop).join(LogStartStop)).fetchall()
 
-        new_dict = dict.fromkeys((Process, LogStartStop), results)
-        print(new_processes.values())
         if not results:
             self.add_processes_to_db(processes)
 
-        print(new_dict.keys() - processes)
-        # else:
-            # print(results-processes)
-            # for result in results:
-                #     name = result[0].name
-                #     process = [process for process in processes if process.name() == name].pop(0)
-                # print(result)
 
         pass
 
     def add_processes_to_db(self, processes):
 
         with Session(self.engine) as session:
-            for one_process in processes:
+            try:
+                for one_process in processes:
 
-                process = Process()
-                start_stop = LogStartStop()
+                    process = Process()
+                    start_stop = LogStartStop()
 
-                process.name = one_process.name()
-                process.status = one_process.status()
+                    process.name = one_process.name()
+                    process.status = one_process.status()
 
-                session.add(process)
-                session.commit()
+                    session.add(process)
+                    session.commit()
 
-                start_stop.proc_id = one_process.pid
+                    start_stop.proc_id = one_process.pid
 
-                if process.status == 'running':
-                    start_stop.started = datetime.fromtimestamp(one_process.create_time())
-                    start_stop.stopped = datetime.fromtimestamp(0)
-                else:
-                    start_stop.started = datetime.fromtimestamp(0)
-                    start_stop.stopped = datetime.fromtimestamp(one_process.create_time())
+                    if process.status == 'running':
+                        start_stop.started = datetime.fromtimestamp(one_process.create_time())
+                        start_stop.stopped = None
+                    else:
+                        start_stop.started = None
+                        start_stop.stopped = datetime.fromtimestamp(one_process.create_time())
 
-                session.add(start_stop)
-                session.commit()
+                    start_stop.process_id = process.id
+
+                    session.add(start_stop)
+                    session.commit()
+            except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+                pass
 
         pass
 

@@ -14,7 +14,7 @@ class ComputerProcesses:
 
     def __init__(self):
         self.db_url = os.environ["db_url"]
-        self.engine = create_engine(self.db_url, echo=False)
+        self.engine = create_engine(self.db_url, echo=True)
         SQLModel.metadata.create_all(self.engine)
         self.create_db_and_tables()
         self.check_processes()
@@ -25,14 +25,12 @@ class ComputerProcesses:
 
     def check_processes(self):
         processes = [process for process in psutil.process_iter(['name', 'pid', 'status'])]
-        # new_processes = dict.fromkeys(('name', 'pid', 'status', 'create_time'), processes)
 
         with Session(self.engine) as session:
             results = session.exec(select(Process, LogStartStop).join(LogStartStop)).fetchall()
 
         if not results:
             self.add_processes_to_db(processes)
-
 
         pass
 
@@ -53,12 +51,13 @@ class ComputerProcesses:
 
                     start_stop.proc_id = one_process.pid
 
+                    dt = datetime.fromtimestamp(one_process.create_time())
                     if process.status == 'running':
-                        start_stop.started = datetime.fromtimestamp(one_process.create_time())
+                        start_stop.started = dt
                         start_stop.stopped = None
                     else:
                         start_stop.started = None
-                        start_stop.stopped = datetime.fromtimestamp(one_process.create_time())
+                        start_stop.stopped = dt
 
                     start_stop.process_id = process.id
 

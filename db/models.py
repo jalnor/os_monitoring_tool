@@ -1,20 +1,20 @@
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List
 
-
-from sqlmodel import SQLModel, Field
-
-
-class LogStartStop(SQLModel, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True)
-    proc_id: str
-    started: Optional[datetime] = None
-    stopped: Optional[datetime] = None
-    process_id: int = Field(default=None, foreign_key="process.id")
+from sqlmodel import SQLModel, Field, Relationship
 
 
 class Process(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     name: str = Field(index=True)
     status: str
+    log_start_stops: List["LogStartStop"] = Relationship(back_populates="process")
+
+
+class LogStartStop(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    proc_id: str
+    started: datetime
+    process_id: int = Field(default=None, foreign_key="process.id")
+    process: Optional[Process] = Relationship(back_populates="log_start_stops")
 

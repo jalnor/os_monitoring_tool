@@ -14,7 +14,7 @@ load_dotenv()
 class ComputerProcesses:
 
     def __init__(self):
-        self.db_url = f'sqlite:///C:\\Users\\hal90\\Documents\\PyBites_PDM\\os_monitoring_tool\\database.db'
+        self.db_url = os.environ["db_url"]
         self.engine = create_engine(self.db_url, echo=False)
 
     def __call__(self):

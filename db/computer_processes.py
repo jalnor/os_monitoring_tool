@@ -15,6 +15,7 @@ class ComputerProcesses:
 
     def __init__(self):
         self.db_url = os.environ["db_url"]
+
         self.engine = create_engine(self.db_url, echo=False)
 
     def __call__(self):
@@ -26,14 +27,17 @@ class ComputerProcesses:
     def create_db_and_tables(self):
         SQLModel.metadata.create_all(self.engine)
 
+
     def get_os_processes(self):
         os_processes = [
             process for process in psutil.process_iter(['name', 'pid', 'status'])
         ]
         return os_processes
 
+
     def get_cached_processes(self):
         with Session(self.engine) as session:
+
             cached_processes = session.exec(
                 select(LogStartStop)
             ).fetchall()
@@ -43,6 +47,7 @@ class ComputerProcesses:
             }
 
     def get_process(self, process_name) -> Optional[Process]:
+
         with Session(self.engine) as session:
             return session.exec(
                 select(Process).where(Process.name == process_name)
@@ -85,6 +90,7 @@ class ComputerProcesses:
                     session.add(process)
                     session.commit()
 
+
                 log_entries = self.get_log_entries_by_pid(pid)
                 if len(log_entries) == 0:
                     # new log entry
@@ -97,6 +103,7 @@ class ComputerProcesses:
                     session.add(entry)
                     log_entries = [entry]
                     session.commit()
+
 
                 # existing process, mark related entries as complete (add end date)
                 for entry in log_entries:

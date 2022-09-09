@@ -20,6 +20,5 @@ class LogStartStop(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     proc_id: str
     started: datetime
-    stopped: Optional[datetime] = None
-    process_id: Optional[int] = Field(default=None, foreign_key="process.id")
+    process_id: int = Field(default=None, foreign_key="process.id")
     process: Optional[Process] = Relationship(back_populates="log_start_stops")

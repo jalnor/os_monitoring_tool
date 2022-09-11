@@ -23,7 +23,6 @@ class ComputerProcesses:
         cached_processes = self.get_cached_processes()
         self.update_processes_in_db(cached_processes, os_processes)
 
-
     def create_db_and_tables(self):
         SQLModel.metadata.create_all(self.engine)
 

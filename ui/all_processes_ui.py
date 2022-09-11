@@ -7,7 +7,8 @@ and was originally taken from @https://www.daniweb.com/programming/software-deve
 import tkinter.font as tkFont
 import tkinter.ttk as ttk
 
-from db.my_db import MyDb
+from db import my_db
+from db.computer_processes import ComputerProcesses
 
 
 class AllProcesses(object):
@@ -15,9 +16,11 @@ class AllProcesses(object):
 
     def __init__(self, process_container):
         self.tree = None
+        self.procs = []
         self.process_container = process_container
         self._setup_widgets()
         self._build_tree()
+        self.refresh_data()
 
     def _setup_widgets(self):
         information = """click on header to sort by that column
@@ -49,7 +52,7 @@ to change width of column drag boundary
             self.tree.column(col,
                              width=tkFont.Font().measure(col.title()))
 
-        for item in procs:
+        for item in self.procs:
             self.tree.insert('', 'end', values=item)
             # adjust column's width if necessary to fit each value
             for ix, val in enumerate(item):
@@ -57,6 +60,18 @@ to change width of column drag boundary
                     col_w = tkFont.Font().measure(val)
                 if self.tree.column(process_header[ix], width=None) < col_w:
                     self.tree.column(process_header[ix], width=col_w)
+
+    def refresh_data(self):
+        print("Inside update...")
+        my_cp = ComputerProcesses()
+        my_cp()
+        self.process_container.after(1000)
+        db = my_db.MyDb()
+        self.procs = db.get_all_processes()
+        self.process_container.after(1000)
+        print(self.procs)
+        self._build_tree()
+        self.process_container.after(60000, self.refresh_data)
 
 
 def sortby(tree, col, descending):
@@ -76,7 +91,6 @@ def sortby(tree, col, descending):
 
 
 # the test data ...
-process_header = ['Name', 'Status', 'Process Id', 'Start Time', 'Stop Time']
-db = MyDb()
-procs = db.get_all_processes()
+process_header = ['Name', 'Status', 'Process Id', 'Start Time', 'Capture Time']
+
 

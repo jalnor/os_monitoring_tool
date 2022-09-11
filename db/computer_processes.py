@@ -14,10 +14,12 @@ load_dotenv()
 class ComputerProcesses:
 
     def __init__(self):
-        self.db_url = f'sqlite:///C:\\Users\\hal90\\Documents\\PyBites_PDM\\os_monitoring_tool\\database.db'
+        self.db_url = os.environ["db_url"]
+
         self.engine = create_engine(self.db_url, echo=False)
 
     def __call__(self):
+
         self.create_db_and_tables()
         os_processes = self.get_os_processes()
         cached_processes = self.get_cached_processes()
@@ -44,6 +46,7 @@ class ComputerProcesses:
             }
 
     def get_process(self, process_name) -> Optional[Process]:
+
         with Session(self.engine) as session:
             return session.exec(
                 select(Process).where(Process.name == process_name)
@@ -107,7 +110,6 @@ class ComputerProcesses:
                     # This will keep process table small but create entries for different
                     # processes in LogStartStop under same process_id, different pid
                     if not log_entries:
-                        print("Process without log_entries...", process)
                         log = self.create_log(process.id, os_process)
                         session.add(log)
                         session.commit()
@@ -116,14 +118,11 @@ class ComputerProcesses:
                     # For updating existing processes, a.k.a. log_entries has values
                     # Create a new entry if status or started have changed
                     log_entry = log_entries[-1]
-                    # print(log_entry)
                     status = os_process.status()
                     started = datetime.fromtimestamp(os_process.create_time())
                     # check if status or start time have changed, then create new entry
                     if log_entry.status != status or log_entry.started != started:
                         new_log_entry = self.create_log(log_entry.process_id, os_process)
-                        print(f'log_entry.status: {log_entry.status} os_status: { status}')
-                        print(f'log_entry.started: {log_entry.started} os_started: {started}')
                         session.add(new_log_entry)
                         session.commit()
 
@@ -140,7 +139,6 @@ class ComputerProcesses:
             for proc in dif:
 
                 logs = self.get_log_entries_by_process_id(proc)
-                print("Logs length: ", len(logs))
                 # Hopefully the last entry is the latest one!!!!! :(
                 new_log_entry = LogStartStop()
                 last_log_entry = logs[-1]

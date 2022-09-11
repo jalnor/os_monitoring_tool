@@ -15,14 +15,15 @@ class ComputerProcesses:
 
     def __init__(self):
         self.db_url = os.environ["db_url"]
+
         self.engine = create_engine(self.db_url, echo=False)
 
     def __call__(self):
+
         self.create_db_and_tables()
         os_processes = self.get_os_processes()
         cached_processes = self.get_cached_processes()
         self.update_processes_in_db(cached_processes, os_processes)
-
 
     def create_db_and_tables(self):
         SQLModel.metadata.create_all(self.engine)
@@ -45,6 +46,7 @@ class ComputerProcesses:
             }
 
     def get_process(self, process_name) -> Optional[Process]:
+
         with Session(self.engine) as session:
             return session.exec(
                 select(Process).where(Process.name == process_name)

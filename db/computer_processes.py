@@ -1,4 +1,5 @@
 import os
+import time
 from datetime import datetime
 from typing import Optional, List
 
@@ -15,11 +16,9 @@ class ComputerProcesses:
 
     def __init__(self):
         self.db_url = os.environ["db_url"]
-
         self.engine = create_engine(self.db_url, echo=False)
 
     def __call__(self):
-
         self.create_db_and_tables()
         os_processes = self.get_os_processes()
         cached_processes = self.get_cached_processes()
@@ -32,7 +31,6 @@ class ComputerProcesses:
         os_processes = [
             process for process in psutil.process_iter(['name', 'pid', 'status'])
         ]
-        print(f'Length of processes list...{len(os_processes)}')
         return os_processes
 
     def get_cached_processes(self):

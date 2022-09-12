@@ -8,7 +8,6 @@ import tkinter.font as tkFont
 import tkinter.ttk as ttk
 
 from db import my_db
-from db.computer_processes import ComputerProcesses
 
 
 class AllProcesses(object):
@@ -20,6 +19,7 @@ class AllProcesses(object):
         self.process_container = process_container
         self._setup_widgets()
         self._build_tree()
+        self.db = my_db.MyDb()
         self.refresh_data()
 
     def _setup_widgets(self):
@@ -62,15 +62,16 @@ to change width of column drag boundary
                     self.tree.column(process_header[ix], width=col_w)
 
     def refresh_data(self):
-        print("Inside update...")
-        my_cp = ComputerProcesses()
-        my_cp()
-        self.process_container.after(1000)
-        db = my_db.MyDb()
-        self.procs = db.get_all_processes()
-        self.process_container.after(1000)
-        print(self.procs)
+        # Get new processes from db
+        self.procs = self.db.get_all_processes()
+
+        # Delete existing values and replace them when tree is rebuilt
+        if self.tree.get_children():
+            for item in self.tree.get_children():
+                self.tree.delete(item)
+
         self._build_tree()
+        # Call the function after one minute to refresh data
         self.process_container.after(60000, self.refresh_data)
 
 
@@ -92,5 +93,3 @@ def sortby(tree, col, descending):
 
 # the test data ...
 process_header = ['Name', 'Status', 'Process Id', 'Start Time', 'Capture Time']
-
-

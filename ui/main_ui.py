@@ -1,7 +1,9 @@
-import subprocess
+import time
 import tkinter as tk
 import tkinter.ttk as ttk
+from threading import Thread
 
+from db.computer_processes import ComputerProcesses
 from ui.all_processes_ui import AllProcesses
 
 
@@ -31,13 +33,29 @@ def create_menubar(parent) -> tk.Menu:
     return menubar
 
 
+def start_daemon():
+    cp = ComputerProcesses()
+    start_time = round(time.time())
+    while True:
+        if (round(time.time()) - start_time) % 30 == 0:
+            print('Update')
+            cp()
+
+
 class MainUi:
     root = tk.Tk()
     root.geometry('1000x550')
     root.title('OS Monitoring Tool')
     menubar = create_menubar(root)
     create_notebook(root)
+    # Create a daemon thread to run ComputerProcess
+    t = Thread(target=start_daemon)
+    t.daemon = True
+    t.start()
+    # Checking status to do something with maybe
+    print("Thread is running: ", t.is_alive())
+    print(t.native_id)
+
     root.configure(menu=menubar)
     root.mainloop()
-
 

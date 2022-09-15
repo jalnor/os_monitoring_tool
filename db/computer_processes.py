@@ -1,4 +1,5 @@
 import os
+import time
 from datetime import datetime
 from typing import Optional
 
@@ -110,7 +111,7 @@ class ComputerProcesses:
                         session.add(log)
                         session.commit()
                         if (process.name, log.status, log.proc_id, log.started,
-                            log.captured) not in self.list_of_current_processes:
+                                log.captured) not in self.list_of_current_processes:
                             self.add_to_list(process, log)
 
                         continue
@@ -126,7 +127,7 @@ class ComputerProcesses:
                         session.add(log)
                         session.commit()
                         if (process.name, log.status, log.proc_id, log.started,
-                            log.captured) not in self.list_of_current_processes:
+                                log.captured) not in self.list_of_current_processes:
                             self.add_to_list(process, log)
                         continue
 
@@ -141,7 +142,7 @@ class ComputerProcesses:
                         session.add(new_log_entry)
                         session.commit()
                         if (process.name, new_log_entry.status, new_log_entry.proc_id, new_log_entry.started,
-                            new_log_entry.captured) not in self.list_of_current_processes:
+                                new_log_entry.captured) not in self.list_of_current_processes:
                             self.add_to_list(process, new_log_entry)
                     else:
                         self.add_to_list(process, log_entry)
@@ -179,4 +180,9 @@ class ComputerProcesses:
 if __name__ == "__main__":
     cp = ComputerProcesses()
     cp()
-
+    start_time = round(time.time())
+    while True:
+        print('Time...', str((round(time.time()) - start_time) % 10))
+        if (round(time.time()) - start_time) % 10 == 0:
+            print('Updating...')
+            cp()

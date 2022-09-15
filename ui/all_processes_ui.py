@@ -79,8 +79,10 @@ to change width of column drag boundary
                              width=tkFont.Font().measure(col.title()))
 
         for item in self.processes:
-            self.tree.insert('', 'end', values=item)
-            self.adjust_column_width(constant_main_tab_headers(), item)
+            if item[0]:
+                self.tree.insert('', 'end', values=item)
+                self.adjust_column_width(constant_main_tab_headers(), item)
+
 
     def adjust_column_width(self, headers, item):
         # adjust column's width if necessary to fit each value
@@ -102,7 +104,9 @@ to change width of column drag boundary
             for item in self.tree.get_children():
                 self.tree.delete(item)
         print("Deleted tree values...", time.time() - start_time)
-        self._build_tree()
+        db_ids = [process[0] for process in self.processes]
+        if db_ids:
+            self._build_tree()
         print("Rebuilt tree...", time.time() - start_time)
         # Call the function after one minute to refresh data
         self.processes_container.after(20000, self.refresh_data)
@@ -118,7 +122,7 @@ to change width of column drag boundary
         result = event.widget
         # selection is now a list of the values from process
         selection = [result.item(item)['values'] for item in result.selection()]
-        # print("It's Working! ", selection[0][0])
+        print("It's Working! ", selection[0][0])
 
         # Get data relating to process
         data_for_process = self.db.get_process_data(selection[0][0])

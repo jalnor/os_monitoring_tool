@@ -2,7 +2,7 @@ import os
 
 from sqlmodel import Session, SQLModel, create_engine, select
 
-from db.computer_processes import ComputerProcesses
+from db.os_processes import OSProcesses
 from db.models import LogStartStop
 
 
@@ -17,9 +17,9 @@ class MyDb:
         SQLModel.metadata.create_all(self.engine)
 
     def get_all_processes(self):
-        cp = ComputerProcesses()
+        cp = OSProcesses()
         cp()
-        return cp.get_list_of_processes()
+        return cp.list_of_current_processes
 
     def get_process_data(self, process_id):
         with Session(self.engine) as session:

@@ -1,23 +1,21 @@
-import time
 import tkinter as tk
 import tkinter.ttk as ttk
-from threading import Thread
 
-from db.computer_processes import ComputerProcesses
 from ui.all_processes_ui import AllProcesses
 
 
 def create_notebook(parent):
     n = ttk.Notebook(parent)
-    n.pack(pady=10, expand=True)
-    f1 = ttk.Frame(n, width=1000, height=450)
-    f2 = ttk.Frame(n, width=1000, height=450)
+    n.pack(pady=3, padx=3, expand=True)
+    n.configure(width=1024, height=768)
+    f1 = ttk.Frame(n, width=1024, height=768)
+    f1.grid(column=0, row=0, sticky='nsew')
     n.add(f1, text='All Processes')
-    n.add(f2, text='Process')
-    process_container = ttk.Frame(f1, width=780, height=450, relief='sunken')
-    AllProcesses(process_container)
+    processes_container = ttk.Frame(f1, width=1000, height=700, relief='sunken')
+    AllProcesses(processes_container, n)
 
 
+# TODO create functions for menu options
 def create_menubar(parent) -> tk.Menu:
     menubar = tk.Menu(parent)
     # Add menus
@@ -33,29 +31,12 @@ def create_menubar(parent) -> tk.Menu:
     return menubar
 
 
-def start_daemon():
-    cp = ComputerProcesses()
-    start_time = round(time.time())
-    while True:
-        if (round(time.time()) - start_time) % 30 == 0:
-            print('Update')
-            cp()
-
-
 class MainUi:
     root = tk.Tk()
-    root.geometry('1000x550')
+    root.geometry('1024x768')
     root.title('OS Monitoring Tool')
     menubar = create_menubar(root)
     create_notebook(root)
-    # Create a daemon thread to run ComputerProcess
-    t = Thread(target=start_daemon)
-    t.daemon = True
-    t.start()
-    # Checking status to do something with maybe
-    print("Thread is running: ", t.is_alive())
-    print(t.native_id)
-
     root.configure(menu=menubar)
     root.mainloop()
 

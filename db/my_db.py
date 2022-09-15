@@ -1,10 +1,9 @@
-from datetime import datetime, timedelta
 import os
 
-import psutil
 from sqlmodel import Session, SQLModel, create_engine, select
 
-from db.models import Process, LogStartStop
+from db.computer_processes import ComputerProcesses
+from db.models import LogStartStop
 
 
 class MyDb:
@@ -13,26 +12,17 @@ class MyDb:
         self.db_url = os.environ["db_url"]
         self.engine = create_engine(self.db_url, echo=True)
         self.create_db_and_tables()
-        # Checking if app pid in result set
-        print("The app pid is: ", os.getpid())
 
     def create_db_and_tables(self):
         SQLModel.metadata.create_all(self.engine)
 
-    def get_os_processes(self):
-        return {
-            (process.name(), process.pid) for process in psutil.process_iter(['name', 'pid', 'status'])
-        }
-
     def get_all_processes(self):
-        new_string = []
+        cp = ComputerProcesses()
+        cp()
+        return cp.get_list_of_processes()
 
+    def get_process_data(self, process_id):
         with Session(self.engine) as session:
-            list_of_processes = session.exec(select(Process, LogStartStop).join(LogStartStop)).fetchall()
-
-        os_processes = self.get_os_processes()
-
-        for process, log in list_of_processes:
-            if (process.name, int(log.proc_id)) in os_processes:
-                new_string.append((process.name, log.status, log.proc_id, log.started, log.captured))
-        return new_string
+            logs = session.exec(select(LogStartStop).where(LogStartStop.process_id == process_id)).fetchall()
+            return [(log.proc_id, log.status, log.started, log.captured) for log in logs]
+        pass

@@ -1,7 +1,6 @@
 import os
-import time
 from datetime import datetime
-from typing import Optional, List
+from typing import Optional
 
 import psutil
 from sqlmodel import create_engine, SQLModel, Session, select
@@ -17,9 +16,10 @@ class ComputerProcesses:
     def __init__(self):
         self.db_url = os.environ["db_url"]
         self.engine = create_engine(self.db_url, echo=False)
+        self.create_db_and_tables()
+        self.list_of_current_processes = []
 
     def __call__(self):
-        self.create_db_and_tables()
         os_processes = self.get_os_processes()
         cached_processes = self.get_cached_processes()
         self.update_processes_in_db(cached_processes, os_processes)
@@ -72,6 +72,16 @@ class ComputerProcesses:
                             process_id=process_id
                         )
 
+    def get_list_of_processes(self):
+        if self.list_of_current_processes:
+            return self.list_of_current_processes
+        else:
+            return []
+
+    def add_to_list(self, process, log):
+        self.list_of_current_processes.append((log.process_id, process.name, log.status, log.proc_id,
+                                               str(log.started).split('.')[0], str(log.captured).split('.')[0]))
+
     def update_processes_in_db(self, cached_processes, os_processes):
 
         with Session(self.engine) as session:
@@ -99,6 +109,10 @@ class ComputerProcesses:
                         log = self.create_log(process.id, os_process)
                         session.add(log)
                         session.commit()
+                        if (process.name, log.status, log.proc_id, log.started,
+                            log.captured) not in self.list_of_current_processes:
+                            self.add_to_list(process, log)
+
                         continue
 
                     log_entries = self.get_log_entries_by_pid(pid)
@@ -111,6 +125,9 @@ class ComputerProcesses:
                         log = self.create_log(process.id, os_process)
                         session.add(log)
                         session.commit()
+                        if (process.name, log.status, log.proc_id, log.started,
+                            log.captured) not in self.list_of_current_processes:
+                            self.add_to_list(process, log)
                         continue
 
                     # For updating existing processes, a.k.a. log_entries has values
@@ -123,7 +140,12 @@ class ComputerProcesses:
                         new_log_entry = self.create_log(log_entry.process_id, os_process)
                         session.add(new_log_entry)
                         session.commit()
-
+                        if (process.name, new_log_entry.status, new_log_entry.proc_id, new_log_entry.started,
+                            new_log_entry.captured) not in self.list_of_current_processes:
+                            self.add_to_list(process, new_log_entry)
+                    else:
+                        self.add_to_list(process, log_entry)
+                    # print(self.list_of_current_processes)
                 except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
                     # TODO: add logging later
                     print("could not retrieve process name, skip")
@@ -138,18 +160,20 @@ class ComputerProcesses:
 
                 logs = self.get_log_entries_by_process_id(proc)
                 # Hopefully the last entry is the latest one!!!!! :(
-                new_log_entry = LogStartStop()
-                last_log_entry = logs[-1]
+                # print(logs)
+                if logs:
+                    new_log_entry = LogStartStop()
+                    last_log_entry = logs[-1]
 
-                if last_log_entry.status == 'running':
-                    new_log_entry.proc_id = last_log_entry.proc_id
-                    new_log_entry.status = 'stopped'
-                    new_log_entry.started = last_log_entry.started
-                    new_log_entry.captured = datetime.now()
-                    new_log_entry.process_id = last_log_entry.process_id
+                    if last_log_entry.status == 'running':
+                        new_log_entry.proc_id = last_log_entry.proc_id
+                        new_log_entry.status = 'stopped'
+                        new_log_entry.started = last_log_entry.started
+                        new_log_entry.captured = datetime.now()
+                        new_log_entry.process_id = last_log_entry.process_id
 
-                    session.add(new_log_entry)
-                    session.commit()
+                        session.add(new_log_entry)
+                        session.commit()
 
 
 if __name__ == "__main__":

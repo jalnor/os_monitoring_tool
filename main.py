@@ -1,6 +1,11 @@
+import io
 import os
 import platform
+import subprocess
 from subprocess import Popen
+
+
+list_of_processes = []
 
 
 def start_ui():
@@ -13,11 +18,12 @@ if __name__ == "__main__":
     os_platform_name = platform.system()
     if os_system == 'nt':
         print('Running file in Windows!')
-        # os.startfile(r'C:\Users\hal90\Documents\PyBites_PDM\os_monitoring_tool\db\computer_processes.py', 'python.exe')
         new_process = Popen(r'python C:\Users\hal90\Documents\PyBites_PDM\os_monitoring_tool\db\computer_processes.py')
-        print(new_process)
-    # elif os_system == 'unix':
-    #     Popen('open', '')
+        print(list_of_processes)
+    elif os_system == 'unix':
+        Popen('python location-of-file')
+    elif os_system == 'nix':
+        Popen('xdg-open location')
 
     start_ui()
 

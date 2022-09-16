@@ -11,6 +11,7 @@ import tkinter.font as tkFont
 import tkinter.ttk as ttk
 
 from db import my_db
+from db.os_processes import OSProcesses
 
 
 def constant_main_tab_headers():
@@ -37,6 +38,7 @@ class AllProcesses(object):
         self._setup_widgets()
         self._build_tree()
         self.db = my_db.MyDb()
+        self.cp = OSProcesses()
         self.refresh_data()
         self.style = ttk.Style()
         # Check which style to apply, WILL ADD MORE LATER AND THESE MAY NEED ADJUSTING
@@ -95,9 +97,10 @@ to change width of column drag boundary
     def refresh_data(self):
         start_time = time.time()
         print("Starting refresh...", start_time)
+        self.cp()
         # Get new processes from db
-        self.processes = self.db.get_all_processes()
-        self.processes.sort(key=lambda x: x[5], reverse=True)
+        self.processes = self.cp.list_of_current_processes
+        # self.processes.sort(key=lambda x: x[5], reverse=True)
         print("Retrieved new data from db...", time.time() - start_time)
         # Delete existing values and replace them when tree is rebuilt
         if self.tree.get_children():

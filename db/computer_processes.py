@@ -36,8 +36,7 @@ class ComputerProcesses:
     def __call__(self):
         os_processes = self.get_os_processes()
         cached_processes = self.get_cached_processes()
-        current_logs = self.get_current_log_entries()
-        self.update_processes_in_db(cached_processes, os_processes, current_logs)
+        self.update_processes_in_db(cached_processes, os_processes)
 
     def create_db_and_tables(self):
         SQLModel.metadata.create_all(self.engine)
@@ -57,10 +56,6 @@ class ComputerProcesses:
             return {
                 (proc.name, int(log.proc_id)) for proc, log in cached_processes
             }
-
-    def get_current_log_entries(self) -> Optional[list[CurrentLog]]:
-        with Session(self.engine) as session:
-            return session.exec(select(CurrentLog)).fetchall()
 
     def get_process(self, process_name) -> Optional[Process]:
         with Session(self.engine) as session:
@@ -91,7 +86,6 @@ class ComputerProcesses:
             process_id=process_id
         )
 
-    # TODO Finish adding data to CurrentLog table.
     def create_current_log(self, process_id, os_process) -> CurrentLog:
         return CurrentLog(
             proc_id=os_process.pid,
@@ -102,9 +96,7 @@ class ComputerProcesses:
         )
 
     @timing
-    def update_processes_in_db(self, cached_processes, os_processes, current_logs):
-        print('Number of processes running: ', len(os_processes))
-        print('Number of current log entries: ', len(self.get_current_log_entries()))
+    def update_processes_in_db(self, cached_processes, os_processes):
         with Session(self.engine) as session:
             if cached_processes:
                 count = 0
@@ -138,12 +130,7 @@ class ComputerProcesses:
                         # if processes can change pids, then need to find by more than pid
                         # Use process_id instead
                         current_log = self.get_log_entry_by_pid(process.id, pid)
-                        if current_log:
-                            print(count, ' ProcessID: ', process.id, ', PID:', pid, ' The current log ProcessID: ',
-                                  current_log.process_id, ' PID: ', current_log.proc_id)
-                        # print('OS Process that should be current: ', os_process,
-                        #       '\nwith process: ', process,
-                        #       '\nwith current log: ', current_log)
+
                         # For repeated times adding to db of same named process, need to check if log
                         # entries is empty so, we can add an entry for same name.
                         # This will keep process table small but create entries for different
@@ -163,7 +150,6 @@ class ComputerProcesses:
                         status = os_process.status()
                         # check if status or start time have changed, then create new entry
                         if current_log.status != status:
-                            print(count, 'Inside CURRENT LOG STATUS CHANGED! ', current_log)
                             current_log.status = status
                             current_log.started = datetime.fromtimestamp(os_process.create_time())
                             session.add(current_log)
@@ -181,9 +167,7 @@ class ComputerProcesses:
                         continue
             else:
                 for os_process in os_processes:
-                    print(f'Adding to db for first time: {os_process}')
-                    # more narrow exception: it seems .name() already hits the
-                    # psutil exception, so in that case skip the rest
+                    # Add to db for first time only
                     try:
                         name = os_process.name()
                         process = self.get_process(name)
@@ -207,27 +191,18 @@ class ComputerProcesses:
                         print("could not retrieve process name, skip")
                         continue
 
-            # TODO fix this section with CurrentLog and LogHistory
             # Finally, check if any processes from db are not in os_processes,
             # then check status and update as necessary.
             # Get a set of names from os_processes, then find what db has that os_processes doesn't
             os_name_set = {(process.name(), process.pid) for process in os_processes}
             dif = cached_processes.difference(os_name_set)
-            reversed_dif = os_name_set.difference(cached_processes)
-            # [print('OS Processes: ', process) for process in os_name_set]
-            # [print('DB Processes: ', cached_process) for cached_process in cached_processes]
-            [print('Difference: ', proc) for proc in dif]
-            [print('Reversed Difference: ', proc) for proc in reversed_dif]
+            # reversed_dif = os_name_set.difference(cached_processes)
             for proc in dif:
-
                 current_log = self.get_log_entries_by_process_name_id(proc)
-                # Hopefully the last entry is the latest one!!!!! :(
-                # print('Associated logs: ', current_log)
                 if current_log:
                     new_log_entry = LogHistory()
 
                     if current_log.status == 'running':
-                        print('Altering log entry: ', current_log)
                         new_date = datetime.now()
                         new_log_entry.proc_id = current_log.proc_id
                         new_log_entry.status = 'stopped'

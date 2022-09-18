@@ -11,7 +11,7 @@ def create_notebook(parent):
     f1 = ttk.Frame(n, width=1024, height=768)
     f1.grid(column=0, row=0, sticky='nsew')
     n.add(f1, text='All Processes')
-    processes_container = ttk.Frame(f1, width=1000, height=700, relief='sunken')
+    processes_container = ttk.Frame(f1, width=1024, height=700, padding=5, relief='sunken')
     AllProcesses(processes_container, n)
 
 

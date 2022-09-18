@@ -1,28 +1,50 @@
 import os
+from datetime import datetime, timedelta
 
 from sqlmodel import Session, SQLModel, create_engine, select
 
-from db.computer_processes import ComputerProcesses
-from db.models import LogStartStop
+from db.models import LogHistory, Process, CurrentLog
+
+from functools import wraps
+from time import time
+
+
+def timing(f):
+    """A simple timer decorator"""
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        start = time()
+        result = f(*args, **kwargs)
+        end = time()
+        print(f'Elapsed time {f.__name__}: {end - start}')
+        return result
+
+    return wrapper
 
 
 class MyDb:
 
     def __init__(self):
         self.db_url = os.environ["db_url"]
-        self.engine = create_engine(self.db_url, echo=True)
-        self.create_db_and_tables()
+        self.engine = create_engine(self.db_url, echo=False)
+        # self.create_db_and_tables()
 
     def create_db_and_tables(self):
         SQLModel.metadata.create_all(self.engine)
 
-    def get_all_processes(self):
-        cp = ComputerProcesses()
-        cp()
-        return cp.get_list_of_processes()
-
     def get_process_data(self, process_id):
         with Session(self.engine) as session:
-            logs = session.exec(select(LogStartStop).where(LogStartStop.process_id == process_id)).fetchall()
+            logs = session.exec(select(LogHistory).where(LogHistory.process_id == process_id)).fetchall()
+            # print('DB logs...', logs)
             return [(log.proc_id, log.status, log.started, log.captured) for log in logs]
         pass
+
+    @timing
+    def get_all_processes(self):
+        with Session(self.engine) as session:
+            procs = session.exec(select(Process, CurrentLog).join(CurrentLog)
+                                 .where(Process.id == CurrentLog.process_id))
+
+            return [(process.id, process.name, currentlog.status,
+                     currentlog.proc_id, currentlog.started, currentlog.captured)
+                    for process, currentlog in procs]

@@ -161,7 +161,7 @@ class ComputerProcesses:
                             continue
 
                         count += 1
-                    except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+                    except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess, psutil.Error):
                         # TODO: add logging later
                         print("could not retrieve process name, skip")
                         continue
@@ -186,7 +186,7 @@ class ComputerProcesses:
                         session.add(log_history)
 
                         session.commit()
-                    except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+                    except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess, psutil.Error):
                         # TODO: add logging later
                         print("could not retrieve process name, skip")
                         continue

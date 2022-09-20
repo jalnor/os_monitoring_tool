@@ -201,7 +201,14 @@ class ComputerProcesses:
             # Finally, check if any processes from db are not in os_processes,
             # then check status and update as necessary.
             # Get a set of names from os_processes, then find what db has that os_processes doesn't
-            os_name_set = {(process.name(), process.pid) for process in os_processes}
+            os_name_set = set()
+            for process in os_processes:
+                try:
+                    os_name_set.add((process.name(), process.pid))
+                except psutil.NoSuchProcess as exc:
+                    print(exc, "skipping")
+                    continue
+
             dif = cached_processes.difference(os_name_set)
             # reversed_dif = os_name_set.difference(cached_processes)
             for proc in dif:

@@ -161,9 +161,16 @@ class ComputerProcesses:
                             continue
 
                         count += 1
+
                     except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess, psutil.Error):
                         # TODO: add logging later
                         print("could not retrieve process name, skip")
+                        continue
+
+                    except Exception as exc:
+                        # not sure what else we can hit, I think Exception
+                        # would catch all (base / parent exception)
+                        print("could not retrieve process name due to some unknown exception: ", exc)
                         continue
             else:
                 for os_process in os_processes:

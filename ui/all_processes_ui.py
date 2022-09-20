@@ -190,8 +190,6 @@ to change width of column drag boundary
 
         # TODO Add in a canvas to create graphs of the data presented
 
-        pass
-
 
 # I am going to update this as it does not work as I would like it to!!!
 def sortby(tree, col, descending):

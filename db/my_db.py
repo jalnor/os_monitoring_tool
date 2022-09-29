@@ -32,9 +32,16 @@ class MyDb:
     def create_db_and_tables(self):
         SQLModel.metadata.create_all(self.engine)
 
-    def get_process_data(self, process_id):
+    def get_process_data(self, process_id, hours_ago: int = 24):
+        look_back_till = datetime.now() - timedelta(hours=hours_ago)
+        breakpoint()
         with Session(self.engine) as session:
-            logs = session.exec(select(LogHistory).where(LogHistory.process_id == process_id)).fetchall()
+            logs = session.exec(
+                select(LogHistory).where(
+                    LogHistory.process_id == process_id,
+                    # LogHistory.captured >= look_back_till
+                )
+            ).fetchall()
             # print('DB logs...', logs)
             return [(log.proc_id, log.status, log.started, log.captured) for log in logs]
         pass

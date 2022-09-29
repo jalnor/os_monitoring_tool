@@ -129,7 +129,13 @@ to change width of column drag boundary
         result = event.widget
         # selection is now a list of the values from process
         selection = [result.item(item)['values'] for item in result.selection()]
-        print("It's Working! ", selection[0][0])
+        try:
+            print("It's Working! ", selection[0][0])
+        except IndexError as exc:
+            print("hitting index error, at this point selection variable =")
+            print(f"{selection=}")
+            # just returning, not sure best workaround, just trying to fix the crash
+            return
 
         # Get data relating to process
         data_for_process = self.db.get_process_data(selection[0][0])
@@ -189,8 +195,6 @@ to change width of column drag boundary
             child.grid_configure(padx=5, pady=5)
 
         # TODO Add in a canvas to create graphs of the data presented
-
-        pass
 
 
 # I am going to update this as it does not work as I would like it to!!!

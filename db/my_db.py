@@ -37,7 +37,6 @@ class MyDb:
             logs = session.exec(select(LogHistory).where(LogHistory.process_id == process_id)).fetchall()
             # print('DB logs...', logs)
             return [(log.proc_id, log.status, log.started, log.captured) for log in logs]
-        pass
 
     @timing
     def get_all_processes(self):

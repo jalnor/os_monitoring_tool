@@ -1,7 +1,7 @@
 import os
 from datetime import datetime, timedelta
 
-from sqlmodel import Session, SQLModel, create_engine, select
+from sqlmodel import Session, SQLModel, create_engine, select, and_
 
 from db.models import LogHistory, Process, CurrentLog
 
@@ -16,7 +16,7 @@ def timing(f):
         start = time()
         result = f(*args, **kwargs)
         end = time()
-        print(f'Elapsed time {f.__name__}: {end - start}')
+        # print(f'Elapsed time {f.__name__}: {end - start}')
         return result
 
     return wrapper
@@ -34,17 +34,16 @@ class MyDb:
 
     def get_process_data(self, process_id, hours_ago: int = 24):
         look_back_till = datetime.now() - timedelta(hours=hours_ago)
-        breakpoint()
         with Session(self.engine) as session:
-            logs = session.exec(
-                select(LogHistory).where(
-                    LogHistory.process_id == process_id,
-                    # LogHistory.captured >= look_back_till
+            query = select(LogHistory).where(
+                and_(
+                    LogHistory.captured >= look_back_till,
+                    LogHistory.process_id == process_id
                 )
-            ).fetchall()
+            )
+            logs = session.exec(query).fetchall()
             # print('DB logs...', logs)
             return [(log.proc_id, log.status, log.started, log.captured) for log in logs]
-        pass
 
     @timing
     def get_all_processes(self):

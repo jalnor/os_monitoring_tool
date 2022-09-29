@@ -111,7 +111,7 @@ class ComputerProcesses:
                         # print('Process retrieved from db: ', process)
                         # If process doesn't exist in db, add entire process and skip to next iteration
                         if process is None:
-                            print('No data in db for process: ', os_process)
+                            # print('No data in db for process: ', os_process)
                             # new process in db
                             process = Process(
                                 name=name
@@ -136,7 +136,7 @@ class ComputerProcesses:
                         # This will keep process table small but create entries for different
                         # processes in LogHistory under same process_id, different pid
                         if not current_log:
-                            print('Inside NO CURRENT LOG!: ', os_process)
+                            # print('Inside NO CURRENT LOG!: ', os_process)
                             current_log = self.create_current_log(process.id, os_process)
                             session.add(current_log)
 
@@ -165,6 +165,8 @@ class ComputerProcesses:
                         # TODO: add logging later
                         print("could not retrieve process name, skip")
                         continue
+                    except Exception as exc:
+                        print('Could not retrieve name due to some unknown exception: ', exc)
             else:
                 for os_process in os_processes:
                     # Add to db for first time only
@@ -194,7 +196,9 @@ class ComputerProcesses:
             # Finally, check if any processes from db are not in os_processes,
             # then check status and update as necessary.
             # Get a set of names from os_processes, then find what db has that os_processes doesn't
-            os_name_set = {(process.name(), process.pid) for process in os_processes}
+            os_name_set = set()
+            for process in os_processes:
+                os_name_set.append(process.name(), process.pid)
             dif = cached_processes.difference(os_name_set)
             # reversed_dif = os_name_set.difference(cached_processes)
             for proc in dif:
@@ -215,7 +219,7 @@ class ComputerProcesses:
 
                         session.commit()
                     else:
-                        print('Deleting log entry: ', current_log)
+                        # print('Deleting log entry: ', current_log)
                         session.delete(current_log)
 
                         session.commit()

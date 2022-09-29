@@ -1,25 +1,10 @@
 import os
-from datetime import datetime, timedelta
+from datetime import datetime as dt, timedelta
 
-from sqlmodel import Session, SQLModel, create_engine, select
+from sqlmodel import Session, SQLModel, create_engine, select, and_
 
 from db.models import LogHistory, Process, CurrentLog
-
-from functools import wraps
-from time import time
-
-
-def timing(f):
-    """A simple timer decorator"""
-    @wraps(f)
-    def wrapper(*args, **kwargs):
-        start = time()
-        result = f(*args, **kwargs)
-        end = time()
-        print(f'Elapsed time {f.__name__}: {end - start}')
-        return result
-
-    return wrapper
+from db.pybites_timer import timing
 
 
 class MyDb:
@@ -32,12 +17,16 @@ class MyDb:
     def create_db_and_tables(self):
         SQLModel.metadata.create_all(self.engine)
 
-    def get_process_data(self, process_id):
+    @timing
+    def get_process_data(self, process_id, from_time, till_time):
+
         with Session(self.engine) as session:
-            logs = session.exec(select(LogHistory).where(LogHistory.process_id == process_id)).fetchall()
-            # print('DB logs...', logs)
+            logs = session.exec(select(LogHistory).where(and_(LogHistory.process_id == process_id,
+                                                         LogHistory.captured <= till_time,
+                                                         LogHistory.captured >= from_time))).fetchall()
+            print('DB logs...', logs)
+            # if log.captured >= yesterday
             return [(log.proc_id, log.status, log.started, log.captured) for log in logs]
-        pass
 
     @timing
     def get_all_processes(self):

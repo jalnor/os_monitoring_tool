@@ -16,21 +16,17 @@ def start_ui():
 
 if __name__ == "__main__":
     os_system = os.name
-    # ms_platform_name = platform.system()
-    # mac_platform_name = platform.uname()
-    # print('Windows ', ms_platform_name)
-    print('Mac ', os_system)
-
+    os_platform_name = platform.system()
     if os_system == 'nt':
         print('Running file in Windows!')
-        new_process = Popen(f'python {os.environ["subprocess_url"]}')
+        new_process = Popen(['python', '-m', 'db.computer_processes'])
     elif os_system == 'posix':
-        new_process = Popen(['python', os.environ["subprocess_url"]])
+        new_process = Popen(['python', '-m', 'db.computer_processes'])
     elif os_system == 'nix':
         Popen('xdg-open location')
 
     if new_process:
-        sleep(3)
+        sleep(2)
         start_ui()
 
 

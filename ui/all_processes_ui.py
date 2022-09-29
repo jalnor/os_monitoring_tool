@@ -9,24 +9,19 @@ import os
 import platform
 import tkinter.font as tkFont
 import tkinter.ttk as ttk
-
 import matplotlib
-import numpy
-from matplotlib import ticker
-
 # from db.ReturnResultsThread import ReturnResults
 from matplotlib.ticker import MultipleLocator
-
-matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
-from matplotlib.dates import date2num
-from matplotlib.figure import Figure
-from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationToolbar2Tk)
+from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg)
 import matplotlib.dates as mdates
 
 from db import my_db
 from db.web_data import WebData
 from db.pybites_timer import timing
+
+
+matplotlib.use('TkAgg')
 
 
 def constant_main_tab_headers():
@@ -87,7 +82,7 @@ to change width of column drag boundary
         self.processes_container.grid_columnconfigure(0, weight=1)
         self.processes_container.grid_rowconfigure(0, weight=1)
 
-    @timing
+    # @timing
     def _build_tree(self):
         for col in constant_main_tab_headers():
             self.tree.heading(col, text=col.title(),
@@ -113,7 +108,7 @@ to change width of column drag boundary
             if tree.column(headers[ix], width=None) < col_w:
                 tree.column(headers[ix], width=col_w)
 
-    @timing
+    # @timing
     def refresh_data(self):
         # Get new processes from db
         self.processes = self.db.get_all_processes()
@@ -131,16 +126,16 @@ to change width of column drag boundary
         self.processes_container.after(5000, self.refresh_data)
 
     # Change focus to the new tab
-    @timing
+    # @timing
     def on_change_tab(self, proc_tab):
         self.parent.select(proc_tab)
 
-    @timing
+    # @timing
     def close_current_tab(self, fig):
         plt.close(fig)
         self.parent.forget("current")
 
-    @timing
+    # @timing
     def open_in_new_tab(self, event):
         result = event.widget
         fig, ax = plt.subplots(figsize=(8, 3), layout='constrained', dpi=100)
@@ -218,13 +213,14 @@ to change width of column drag boundary
         x_major = list(dict.fromkeys([str(dt[2]).split(' ')[0] for dt in data_for_process]))
         count = 0
         for x in x_major:
-            time_lists.append([y[2].time().strftime('%H:%M:%S') for y in data_for_process if str(y[2]).split(" ")[0] == x])
+            time_lists.append(
+                [y[2].time().strftime('%H:%M:%S') for y in data_for_process if str(y[2]).split(" ")[0] == x])
 
         x_major_locations = [0.0]
         # print('Length of time_lists:', len(time_lists))
         # print('Length of x_minor_floats:', len(x_minor_floats))
         last_x = 0
-        for x in time_lists[:(len(time_lists)-1)]:
+        for x in time_lists[:(len(time_lists) - 1)]:
             x_major_locations.append(len(x) + last_x + 1)
             last_x += len(x)
         # print('Major labels: ', x_major)
@@ -277,7 +273,6 @@ to change width of column drag boundary
         process_container.pack(fill="both", expand=True)
         for child in process_container.winfo_children():
             child.grid_configure(padx=5, pady=5)
-
 
     def get_web_data(self, selection) -> str:
         return WebData.get_web_data(WebData, selection[0][1])

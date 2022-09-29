@@ -9,20 +9,9 @@ from sqlmodel import create_engine, SQLModel, Session, select
 from dotenv import load_dotenv
 
 from db.models import Process, LogHistory, CurrentLog
+from db.pybites_timer import timing
 
 load_dotenv()
-
-def timing(f):
-    """A simple timer decorator"""
-    @wraps(f)
-    def wrapper(*args, **kwargs):
-        start = time.time()
-        result = f(*args, **kwargs)
-        end = time.time()
-        print(f'Elapsed time {f.__name__}: {end - start}')
-        return result
-
-    return wrapper
 
 
 class ComputerProcesses:
@@ -95,7 +84,7 @@ class ComputerProcesses:
             process_id=process_id
         )
 
-    @timing
+    # @timing
     def update_processes_in_db(self, cached_processes, os_processes):
         with Session(self.engine) as session:
             if cached_processes:
@@ -196,9 +185,9 @@ class ComputerProcesses:
             # Finally, check if any processes from db are not in os_processes,
             # then check status and update as necessary.
             # Get a set of names from os_processes, then find what db has that os_processes doesn't
-            os_name_set = set()
+            os_name_set = set(tuple())
             for process in os_processes:
-                os_name_set.append(process.name(), process.pid)
+                os_name_set.add((process.name(), process.pid))
             dif = cached_processes.difference(os_name_set)
             # reversed_dif = os_name_set.difference(cached_processes)
             for proc in dif:

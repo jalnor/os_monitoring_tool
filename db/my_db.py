@@ -17,7 +17,7 @@ class MyDb:
     def create_db_and_tables(self):
         SQLModel.metadata.create_all(self.engine)
 
-    @timing
+    # @timing
     def get_process_data(self, process_id, from_time, till_time):
 
         with Session(self.engine) as session:
@@ -28,7 +28,7 @@ class MyDb:
             # if log.captured >= yesterday
             return [(log.proc_id, log.status, log.started, log.captured) for log in logs]
 
-    @timing
+    # @timing
     def get_all_processes(self):
         with Session(self.engine) as session:
             procs = session.exec(select(Process, CurrentLog).join(CurrentLog)

@@ -24,8 +24,7 @@ class MyDb:
             logs = session.exec(select(LogHistory).where(and_(LogHistory.process_id == process_id,
                                                          LogHistory.captured <= till_time,
                                                          LogHistory.captured >= from_time))).fetchall()
-            print('DB logs...', logs)
-            # if log.captured >= yesterday
+            # print('DB logs...', logs)
             return [(log.proc_id, log.status, log.started, log.captured) for log in logs]
 
     # @timing

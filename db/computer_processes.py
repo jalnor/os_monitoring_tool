@@ -156,6 +156,7 @@ class ComputerProcesses:
                         continue
                     except Exception as exc:
                         print('Could not retrieve name due to some unknown exception: ', exc)
+                        continue
             else:
                 for os_process in os_processes:
                     # Add to db for first time only
@@ -180,6 +181,9 @@ class ComputerProcesses:
                     except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess, psutil.Error):
                         # TODO: add logging later
                         print("could not retrieve process name, skip")
+                        continue
+                    except Exception as exc:
+                        print('Could not retrieve name due to some unknown exception: ', exc)
                         continue
 
             # Finally, check if any processes from db are not in os_processes,
@@ -221,5 +225,5 @@ if __name__ == "__main__":
     while True:
         # print('Time...', str((round(time.time()) - start_time) % 10))
         if (round(time.time()) - start_time) % 5 == 0:
-            print('Updating...')
+            # print('Updating...')
             cp()

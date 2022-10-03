@@ -9,20 +9,9 @@ from sqlmodel import create_engine, SQLModel, Session, select
 from dotenv import load_dotenv
 
 from db.models import Process, LogHistory, CurrentLog
+from db.pybites_timer import timing
 
 load_dotenv()
-
-def timing(f):
-    """A simple timer decorator"""
-    @wraps(f)
-    def wrapper(*args, **kwargs):
-        start = time.time()
-        result = f(*args, **kwargs)
-        end = time.time()
-        print(f'Elapsed time {f.__name__}: {end - start}')
-        return result
-
-    return wrapper
 
 
 class ComputerProcesses:
@@ -95,7 +84,7 @@ class ComputerProcesses:
             process_id=process_id
         )
 
-    @timing
+    # @timing
     def update_processes_in_db(self, cached_processes, os_processes):
         with Session(self.engine) as session:
             if cached_processes:
@@ -111,7 +100,7 @@ class ComputerProcesses:
                         # print('Process retrieved from db: ', process)
                         # If process doesn't exist in db, add entire process and skip to next iteration
                         if process is None:
-                            print('No data in db for process: ', os_process)
+                            # print('No data in db for process: ', os_process)
                             # new process in db
                             process = Process(
                                 name=name
@@ -136,7 +125,7 @@ class ComputerProcesses:
                         # This will keep process table small but create entries for different
                         # processes in LogHistory under same process_id, different pid
                         if not current_log:
-                            print('Inside NO CURRENT LOG!: ', os_process)
+                            # print('Inside NO CURRENT LOG!: ', os_process)
                             current_log = self.create_current_log(process.id, os_process)
                             session.add(current_log)
 
@@ -161,16 +150,12 @@ class ComputerProcesses:
                             continue
 
                         count += 1
-
                     except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess, psutil.Error):
                         # TODO: add logging later
                         print("could not retrieve process name, skip")
                         continue
-
                     except Exception as exc:
-                        # not sure what else we can hit, I think Exception
-                        # would catch all (base / parent exception)
-                        print("could not retrieve process name due to some unknown exception: ", exc)
+                        print('Could not retrieve name due to some unknown exception: ', exc)
                         continue
             else:
                 for os_process in os_processes:
@@ -197,18 +182,16 @@ class ComputerProcesses:
                         # TODO: add logging later
                         print("could not retrieve process name, skip")
                         continue
+                    except Exception as exc:
+                        print('Could not retrieve name due to some unknown exception: ', exc)
+                        continue
 
             # Finally, check if any processes from db are not in os_processes,
             # then check status and update as necessary.
             # Get a set of names from os_processes, then find what db has that os_processes doesn't
-            os_name_set = set()
+            os_name_set = set(tuple())
             for process in os_processes:
-                try:
-                    os_name_set.add((process.name(), process.pid))
-                except psutil.NoSuchProcess as exc:
-                    print(exc, "skipping")
-                    continue
-
+                os_name_set.add((process.name(), process.pid))
             dif = cached_processes.difference(os_name_set)
             # reversed_dif = os_name_set.difference(cached_processes)
             for proc in dif:
@@ -229,7 +212,7 @@ class ComputerProcesses:
 
                         session.commit()
                     else:
-                        print('Deleting log entry: ', current_log)
+                        # print('Deleting log entry: ', current_log)
                         session.delete(current_log)
 
                         session.commit()
@@ -242,5 +225,5 @@ if __name__ == "__main__":
     while True:
         # print('Time...', str((round(time.time()) - start_time) % 10))
         if (round(time.time()) - start_time) % 5 == 0:
-            print('Updating...')
+            # print('Updating...')
             cp()

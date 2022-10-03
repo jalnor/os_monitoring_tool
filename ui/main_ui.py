@@ -1,3 +1,4 @@
+import sys
 import tkinter as tk
 import tkinter.ttk as ttk
 
@@ -6,12 +7,12 @@ from ui.all_processes_ui import AllProcesses
 
 def create_notebook(parent):
     n = ttk.Notebook(parent)
-    n.pack(pady=3, padx=3, expand=True)
+    n.pack(fill='both', pady=3, padx=3, expand=True)
     n.configure(width=1024, height=768)
-    f1 = ttk.Frame(n, width=1024, height=768)
-    f1.grid(column=0, row=0, sticky='nsew')
-    n.add(f1, text='All Processes')
-    processes_container = ttk.Frame(f1, width=1024, height=700, padding=5, relief='sunken')
+    frame1 = ttk.Frame(n, width=1024, height=768)
+    frame1.grid(column=0, row=0, sticky='nsew')
+    n.add(frame1, text='All Processes')
+    processes_container = ttk.Frame(frame1, width=1024, height=700, padding=5, relief='sunken')
     AllProcesses(processes_container, n)
 
 
@@ -31,10 +32,15 @@ def create_menubar(parent) -> tk.Menu:
     return menubar
 
 
+def destroyer():
+    sys.exit()
+
+
 class MainUi:
     root = tk.Tk()
     root.geometry('1024x768')
     root.title('OS Monitoring Tool')
+    root.protocol("WM_DELETE_WINDOW", destroyer)
     menubar = create_menubar(root)
     create_notebook(root)
     root.configure(menu=menubar)

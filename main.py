@@ -13,7 +13,7 @@ def start_ui():
 
 if __name__ == "__main__":
     os_system = os.name
-    if os_system == 'nt' or os_system == 'posix':
+    if os_system in ('nt', 'posix'):
         new_process = Popen(['python', '-m', 'db.computer_processes'])
 
     if new_process:

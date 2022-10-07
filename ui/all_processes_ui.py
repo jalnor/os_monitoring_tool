@@ -37,10 +37,10 @@ class AllProcesses(object):
 
     def __init__(self, processes_container, notebook_parent):
         # Get the os info to apply up-to-date styling
-        os_name = os.name
+        self.os_name = os.name
         os_platform = platform.system()
         # Please check this print out to see if naming in 'if' statement below is correct
-        print(os_name, ':', os_platform)
+        # print(self.os_name, ':', os_platform)
         self.tree = None
         self.processes_container = processes_container
         self.parent = notebook_parent
@@ -53,7 +53,7 @@ class AllProcesses(object):
         self.style = ttk.Style()
         # Check which style to apply, WILL ADD MORE LATER AND THESE MAY NEED ADJUSTING
         if os_platform == 'Windows':
-            if os_name == 'nt':
+            if self.os_name == 'nt':
                 self.style.theme_use('winnative')
         elif os_platform == 'MacOS':
             self.style.theme_use('aqua')
@@ -264,7 +264,7 @@ to change width of column drag boundary
         # web_data_thread.start()
         # web_data_thread.join()
         # web_data = web_data_thread.result
-        web_data = WebData.get_web_data(WebData, selection[0][1])
+        web_data = WebData.get_web_data(WebData, process_name=selection[0][1], os_name=self.os_name)
         p.stop()
         print('Web data: ', web_data)
         ttk.Label(text_frame, text=web_data, padding=10, wraplength=950) \

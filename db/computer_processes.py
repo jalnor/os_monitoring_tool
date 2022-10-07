@@ -189,9 +189,17 @@ class ComputerProcesses:
             # Finally, check if any processes from db are not in os_processes,
             # then check status and update as necessary.
             # Get a set of names from os_processes, then find what db has that os_processes doesn't
-            os_name_set = set(tuple())
+            os_name_set: set[tuple] = set()
             for process in os_processes:
-                os_name_set.add((process.name(), process.pid))
+                try:
+                    os_name_set.add((process.name(), process.pid))
+                except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess, psutil.Error):
+                    # TODO: add logging later
+                    print("could not retrieve process name, skip")
+                    continue
+                except Exception as exc:
+                    print('Could not retrieve name due to some unknown exception: ', exc)
+                    continue
             dif = cached_processes.difference(os_name_set)
             # reversed_dif = os_name_set.difference(cached_processes)
             for proc in dif:

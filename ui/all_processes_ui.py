@@ -122,7 +122,8 @@ to change width of column drag boundary
         db_ids = [process[0] for process in self.processes]
         if db_ids:
             self._build_tree()
-        # Call the function after one minute to refresh data
+        # Call the function after five seconds to refresh data
+        # TODO make wait time a variable
         self.processes_container.after(5000, self.refresh_data)
 
     # Change focus to the new tab
@@ -141,37 +142,32 @@ to change width of column drag boundary
         fig, ax = plt.subplots(figsize=(8, 3), layout='constrained', dpi=100)
         # selection is now a list of the values from process
         selection = [result.item(item)['values'] for item in result.selection()]
-        print("It's Working! ", selection[0][0])
-        # list_of_statuses = []
+
         yesterday = dt.now() - timedelta(hours=24)
         hour = dt.now() - timedelta(hours=1)
         print('Time difference: ', (dt.now() - hour))
         # Get data relating to process
+        """ Not working correctly """
         data_for_process = self.db.get_process_data(selection[0][0], hour, dt.now())
         data_for_process.sort(key=lambda x: x[3], reverse=True)
         print('Length of data: ', len(data_for_process))
         frame2 = ttk.Frame(self.parent, width=1024, height=768)
         frame2.grid(column=0, row=0, sticky='nsew')
-        self.parent.add(frame2, text="Process")
+        self.parent.add(frame2, text=selection[0][1])
         self.on_change_tab(frame2)
 
         process_container = ttk.Frame(frame2, width=1024, height=768, padding=5, relief='sunken')
         process_container.grid(column=0, row=0, sticky='nsew')
-        # process_container.columnconfigure((0, 1, 2), weight=1)
         # Button and headings for top sections
         close_button = ttk.Button(process_container, text="Close", command=lambda: self.close_current_tab(fig))
         close_button.grid(column=0, row=0, sticky='w')
-        # close_button.place(x=0, y=0, relwidth=150, relheight=50, anchor='w')
         ttk.Label(process_container, text="Current Process", padding=2).grid(column=1, row=0, sticky='w')
-        # ttk.Label(process_container, text="Current Process", padding=2).place(x=0, y=1, anchor='nw')
         ttk.Label(process_container, text="Process History", padding=2).grid(column=2, row=0, sticky='w')
-        # ttk.Label(process_container, text="Process History", padding=2).place(x=0, y=2, anchor='nw')
 
         # Column 1 frame with current process name and id
         name_frame = ttk.Frame(process_container, width=150, height=350,
                                padding=5, borderwidth=5, relief='flat')
         name_frame.grid(column=1, row=1, sticky='nsew')
-        # name_frame.place(x=1, y=1, anchor='w')
 
         ttk.Label(name_frame, text=selection[0][0], justify='center').grid(column=1, row=1)
         ttk.Label(name_frame, text=selection[0][1], justify='center').grid(column=1, row=2)
@@ -179,7 +175,6 @@ to change width of column drag boundary
         # Create the data frame and tree to display logs
         data_frame = ttk.Frame(process_container, width=700, height=350, padding=5, borderwidth=5, relief='flat')
         data_frame.grid(column=2, columnspan=4, row=1, sticky='nsew')
-        # data_frame.place(x=2, y=1, anchor='nw')
         data_tree = ttk.Treeview(data_frame, columns=constant_secondary_tab_headers(), show='headings')
         data_tree.grid(column=0, row=0, in_=data_frame)
 
@@ -197,7 +192,6 @@ to change width of column drag boundary
 
         graph_frame = ttk.Frame(process_container, width=1000, height=250, padding=5, borderwidth=5, relief='sunken')
         graph_frame.grid(column=0, columnspan=6, row=5, sticky='nesw')
-        # graph_frame.place(x=15, y=0, anchor='nw')
 
         list_of_statuses = [(1 if dt[1] == 'running' else 0) for dt in data_for_process]
         print(list_of_statuses)
@@ -251,7 +245,6 @@ to change width of column drag boundary
 
         text_frame = ttk.Frame(process_container, width=900, height=150, padding=5, borderwidth=5, relief='sunken')
         text_frame.grid(column=0, columnspan=6, row=15, rowspan=10, sticky='nesw')
-        # text_frame.place(x=0, y=5, anchor='nw')
         p = ttk.Progressbar(text_frame, orient='horizontal', length=200, mode='determinate')
         p.start()
 

@@ -144,11 +144,12 @@ to change width of column drag boundary
         print("It's Working! ", selection[0][0])
         # list_of_statuses = []
         yesterday = dt.now() - timedelta(hours=24)
-        print('Time difference: ', (dt.now() - yesterday))
+        hour = dt.now() - timedelta(hours=1)
+        print('Time difference: ', (dt.now() - hour))
         # Get data relating to process
-        data_for_process = self.db.get_process_data(selection[0][0], yesterday, dt.now())
+        data_for_process = self.db.get_process_data(selection[0][0], hour, dt.now())
         data_for_process.sort(key=lambda x: x[3], reverse=True)
-
+        print('Length of data: ', len(data_for_process))
         frame2 = ttk.Frame(self.parent, width=1024, height=768)
         frame2.grid(column=0, row=0, sticky='nsew')
         self.parent.add(frame2, text="Process")
@@ -217,18 +218,11 @@ to change width of column drag boundary
                 [y[2].time().strftime('%H:%M:%S') for y in data_for_process if str(y[2]).split(" ")[0] == x])
 
         x_major_locations = [0.0]
-        # print('Length of time_lists:', len(time_lists))
-        # print('Length of x_minor_floats:', len(x_minor_floats))
         last_x = 0
         for x in time_lists[:(len(time_lists) - 1)]:
             x_major_locations.append(len(x) + last_x + 1)
             last_x += len(x)
-        # print('Major labels: ', x_major)
-        # print('Major locations: ', x_major_locations)
-        # print('time_lists: ', time_lists)
-        # print('x_minor_floats: ', x_minor_floats)
-        # print('x_minor: ', x_minor)
-        # print('Length of x_major_locations: ', len(x_major_locations))
+
         ax.plot(list_of_statuses, label='Status')
 
         ax.format_xdata = mdates.DateFormatter('%Y-%m-%d')
@@ -260,10 +254,7 @@ to change width of column drag boundary
         # text_frame.place(x=0, y=5, anchor='nw')
         p = ttk.Progressbar(text_frame, orient='horizontal', length=200, mode='determinate')
         p.start()
-        # web_data_thread = ReturnResults(target=self.get_web_data, args=(selection,))
-        # web_data_thread.start()
-        # web_data_thread.join()
-        # web_data = web_data_thread.result
+
         web_data = WebData.get_web_data(WebData, process_name=selection[0][1], os_name=self.os_name)
         p.stop()
         print('Web data: ', web_data)

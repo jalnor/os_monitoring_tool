@@ -10,7 +10,7 @@ A Python tool that monitors processes as they start and stop. It utilizes a sepa
 * Python 3.10
 * Poetry 1.1.15 or
 * Pip (Which comes with Python)
-* Database (Sqlite is the default but if you want to use another DBMS you can find instructions in the .env-template file)
+* Database (Sqlite is the default but if you want to use another DBMS you can find instructions in the [.env-template](https://github.com/jalnor/os_monitoring_tool/blob/main/.env-template) file)
 
 ## Python Installation ![python-logo-evensmaller](https://user-images.githubusercontent.com/31383711/200034228-92eebe7f-ce3b-4bf9-a7b2-1e314d5683bb.png)
 ---
@@ -52,13 +52,42 @@ python3 -m venv <name_of_virtualenv>
 ```
 This will create a virtual environment folder, venv, in the project directory.
 
-<img src="https://user-images.githubusercontent.com/31383711/200044187-52794cc9-d438-4c69-b07f-baf11d3abd0d.png" width="60" />
-Next, you will need to activate the environment. Your prompt will change indicating the venv is active. To deactivate run same command with deactivate instead. 
-<img src="https://user-images.githubusercontent.com/31383711/200049624-147beb06-96fc-41fc-8d9d-1005150ca6fd.png" width="400" />
+<img src="https://user-images.githubusercontent.com/31383711/200119581-877c040b-3d7c-4c7b-8599-1efa4a4c6aba.png" width="80" />
+
+Next, you will need to activate the environment. Your prompt will change indicating the venv is active with the name surrounded by parenthesis. To deactivate run same command with deactivate instead or simply type deactivate. 
+```
+c:\Users\Public\app_dir>python -m venv my_venv
+
+c:\Users\Public\app_dir>dir
+ Volume in drive C has no label.
+ Volume Serial Number is C446-E6DE
+
+ Directory of c:\Users\Public\app_dir
+
+11/05/2022  08:14 AM    <DIR>          .
+11/05/2022  08:14 AM    <DIR>          ..
+11/05/2022  08:14 AM    <DIR>          my_venv
+               0 File(s)              0 bytes
+               3 Dir(s)  350,627,840,000 bytes free
+
+c:\Users\Public\app_dir>my_venv\scripts\activate.bat
+
+(my_venv) c:\Users\Public\app_dir>deactivate
+c:\Users\Public\app_dir>
+```
 
 Note: the image above is using Windows Command Prompt. On Unix type systems or with Git Bash for Windows, you will need to use:
+```
+user@machine MINGW64 /c/Users/Public/app_dir
+$ source my_venv/Scripts/activate
+(my_venv)
+user@machine MINGW64 /c/Users/Public/app_dir
+$ deactivate
 
-<img src="https://user-images.githubusercontent.com/31383711/200051763-97ea742b-c1f7-49da-8eb1-6d994355fba4.png" width="400" />
+user@machine MINGW64 /c/Users/Public/app_dir
+$
+```
+
 
 Simply type deactivate at the prompt to deactivate the virtual environment.
 

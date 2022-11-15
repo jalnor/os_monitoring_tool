@@ -10,7 +10,7 @@ import platform
 import tkinter.font as tkFont
 import tkinter.ttk as ttk
 import matplotlib
-# from db.ReturnResultsThread import ReturnResults
+from tkhtmlview import HTMLLabel
 from matplotlib.ticker import MultipleLocator
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg)
@@ -110,6 +110,7 @@ to change width of column drag boundary
 
     # @timing
     def refresh_data(self):
+        # TODO get sorted state and maintain it after refresh
         # Get new processes from db
         self.processes = self.db.get_all_processes()
         self.processes.sort(key=lambda x: x[5], reverse=True)
@@ -191,7 +192,7 @@ to change width of column drag boundary
             self.adjust_column_width(data_tree, constant_secondary_tab_headers(), data)
 
         graph_frame = ttk.Frame(process_container, width=1000, height=250, padding=5, borderwidth=5, relief='sunken')
-        graph_frame.grid(column=0, columnspan=6, row=5, sticky='nesw')
+        graph_frame.grid(column=0, columnspan=6, row=5, sticky='nsew')
 
         list_of_statuses = [(1 if dt[1] == 'running' else 0) for dt in data_for_process]
         print(list_of_statuses)
@@ -244,16 +245,22 @@ to change width of column drag boundary
         canvas.get_tk_widget().pack()
 
         text_frame = ttk.Frame(process_container, width=900, height=150, padding=5, borderwidth=5, relief='sunken')
-        text_frame.grid(column=0, columnspan=6, row=15, rowspan=10, sticky='nesw')
-        p = ttk.Progressbar(text_frame, orient='horizontal', length=200, mode='determinate')
-        p.start()
+        text_frame.grid(column=0, columnspan=6, row=15, rowspan=5, sticky='nsew')
+        # p = ttk.Progressbar(text_frame, orient='horizontal', length=200, mode='determinate')
+        # p.start()
 
         web_data = WebData.get_web_data(WebData, process_name=selection[0][1], os_name=self.os_name)
-        p.stop()
-        print('Web data: ', web_data)
-        ttk.Label(text_frame, text=web_data, padding=10, wraplength=950) \
-            .grid(column=1, columnspan=10, row=1, rowspan=10)
-
+        web_data = web_data.split('\n')
+        # p.stop()
+        print('Web data: ', web_data[-1:])
+        main_label = ttk.Label(text_frame, text=''.join(web_data[:-1]), padding=2, wraplength=950)
+        main_label.grid(column=0, row=0)
+        # vsb = ttk.Scrollbar(orient="vertical")
+        # hsb = ttk.Scrollbar(orient="horizontal")
+        # vsb.grid(column=1, row=0, sticky='ns', in_=text_frame)
+        # hsb.grid(column=1, row=10, columnspan=10, sticky='ews', in_=text_frame)
+        my_label = HTMLLabel(text_frame, html=''.join(web_data[-1:]))
+        my_label.grid(column=0, row=1)
         process_container.pack(fill="both", expand=True)
         for child in process_container.winfo_children():
             child.grid_configure(padx=5, pady=5)

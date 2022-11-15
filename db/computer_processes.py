@@ -63,7 +63,7 @@ class ComputerProcesses:
         with Session(self.engine) as session:
             logs = session.exec(
                 select(CurrentLog).join(Process).where(Process.name == proc[0], CurrentLog.proc_id == proc[1])
-            ).one_or_none()
+            ).first()
             return logs
 
     def create_log_history(self, process_id, os_process) -> LogHistory:

@@ -250,6 +250,7 @@ to change width of column drag boundary
         # p.start()
 
         web_data = WebData.get_web_data(WebData, process_name=selection[0][1], os_name=self.os_name)
+        # TODO use splitlines instead as it covers more use cases
         web_data = web_data.split('\n')
         # p.stop()
         print('Web data: ', web_data[-1:])

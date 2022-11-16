@@ -46,12 +46,14 @@ class ComputerProcesses:
                 (proc.name, int(log.proc_id)) for proc, log in cached_processes
             }
 
+
     def get_process(self, process_name) -> Optional[Process]:
         with Session(self.engine) as session:
             return session.exec(
                 select(Process).where(Process.name == process_name)
             ).first()
 
+    # TODO Check these calls for proper method
     def get_log_entry_by_pid(self, process_id, pid) -> Optional[CurrentLog]:
         with Session(self.engine) as session:
             return session.exec(select(CurrentLog).where(

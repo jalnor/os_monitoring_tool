@@ -7,95 +7,38 @@ A Python tool that monitors processes as they start and stop. It utilizes a sepa
 
 ## System Requirements
 ---
-* Python 3.10
+* Python 3.10, see [PYTHONINSTALL.md](PYTHONINSTALL.md) for detailed instructions.
 * Poetry 1.1.15 or
 * Pip (Which comes with Python)
 * Database (Sqlite is the default but if you want to use another DBMS you can find instructions in the [.env-template](https://github.com/jalnor/os_monitoring_tool/blob/main/.env-template) file)
 
-## Python Installation ![python-logo-evensmaller](https://user-images.githubusercontent.com/31383711/200034228-92eebe7f-ce3b-4bf9-a7b2-1e314d5683bb.png)
----
-Alternatively: you can use [pyenv](https://github.com/pyenv/pyenv) to manage your Python installations. If you do, you can skip this 'Python Installation' section and go to ['Setup Virtual Environment'](https://github.com/jalnor/os_monitoring_tool/edit/main/README.md#setup-virtual-environment).
-
-**Check if Python is installed and get version info:**
-### Windows
-Open a  command prompt and type python --version or python3 --version. This should give you something like this:
-```
-Microsoft Windows [Version 10.0.19044.2130]
-(c) Microsoft Corporation. All rights reserved.
-
-C:\Users\[current_user]>python --version
-Python 3.10.4
-```
-
-If you have a lower version or Python isn't installed, you can go to [python.org](https://www.python.org/downloads/) to download and install it. They have a lot of useful guides to help with the process.
-
-### Mac
-Mac comes with Python 2.x which is outdated. If your system does not have a newer version you can use Homebrew to install it.
-If you have Homebrew installed it is easy to install the latest version of Python. If not, you can install Homebrew by pasting this in your terminal:
-```
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-```
-Per Homebrew home page, the script will explain what it is doing. If you need more information before installing it you can go the website [brew.sh](https://brew.sh/).
-With Homebrew installed, type this in terminal:
-```
-brew install python3
-```
-
-### Linux
-Most flavors of Linux come with Python; however, Ubuntu may not. You can find information at [Geeks for Geeks](https://www.geeksforgeeks.org/how-to-download-and-install-python-latest-version-on-linux/?ref=gcse) on how to install it on Linux.
-
-## Setup Virtual Environment
----
-Once you have Python installed, using the command prompt or the Linux or Mac terminal, navigate to the folder where you downloaded the application. Type the following replacing the <name_of_virtualenv> with an appropriate name without the angle brackets and press enter:
-```
-python3 -m venv <name_of_virtualenv>
-```
-This will create a virtual environment folder, venv, in the project directory.
-
-<img src="https://user-images.githubusercontent.com/31383711/200119581-877c040b-3d7c-4c7b-8599-1efa4a4c6aba.png" width="80" />
-
-Next, you will need to activate the environment. Your prompt will change indicating the venv is active with the name surrounded by parenthesis. To deactivate run same command with deactivate instead or simply type deactivate. 
-```
-c:\Users\Public\app_dir>python -m venv my_venv
-
-c:\Users\Public\app_dir>dir
- Volume in drive C has no label.
- Volume Serial Number is C446-E6DE
-
- Directory of c:\Users\Public\app_dir
-
-11/05/2022  08:14 AM    <DIR>          .
-11/05/2022  08:14 AM    <DIR>          ..
-11/05/2022  08:14 AM    <DIR>          my_venv
-               0 File(s)              0 bytes
-               3 Dir(s)  350,627,840,000 bytes free
-
-c:\Users\Public\app_dir>my_venv\scripts\activate.bat
-
-(my_venv) c:\Users\Public\app_dir>deactivate
-c:\Users\Public\app_dir>
-```
-
-Note: the image above is using Windows Command Prompt. On Unix type systems or with Git Bash for Windows, you will need to use:
-```
-user@machine MINGW64 /c/Users/Public/app_dir
-$ source my_venv/Scripts/activate
-(my_venv)
-user@machine MINGW64 /c/Users/Public/app_dir
-$ deactivate
-
-user@machine MINGW64 /c/Users/Public/app_dir
-$
-```
-
-
-Simply type deactivate at the prompt to deactivate the virtual environment.
-
-You can find a more detailed description at this [Gist](https://gist.github.com/djccnt15/55105dea001df6ce4eccb7d2a1c719e3). This Gist also has detailed instructions for installing requirements using pip.
-
 
 ### Poetry Installation
-You can find out about poetry at the official site [python-poetry.org](https://python-poetry.org/docs/#installing-with-the-official-installer) 
+Per the [documentation](https://python-poetry.org/docs/), Poetry is a dependency management and packaging tool.
+
+##### Note: You can follow the instructions on their [website](https://python-poetry.org/docs/) to install poetry.
+##### Note: Make sure to follow the instructions for activating the virtual environment in the PYTHONINSTALL.md file before continuing.
+To install the requirements for the app type:
+
+``` poetry install ```
+
+and poetry will install all the dependencies listed in the project.lock file.
+
+If you are planning on developing this app further, it is easy to add new dependencies, build, and package your application. A simple example of adding a dependency is:
+
+``` poetry add requests ```
+
+This will pull in all the dependencies required for the requests package and add them to the poetry.lock and .toml files.
+
+Now you are ready to setup your .env file. You need to create this file in the root directory of the project. There is a template provided that shows what needs to be added to the .env file.
+This includes the url for which database you are using. Also, be sure to copy over the subprocess and web_lookup just as they appear as those are needed for the app to run properly.
+
+
+Once the dependencies are installed and the .env file are in place, you can run the app.
+
+``` poetry run python main.py```
+
+That is it, the app should be up and running at this point, capturing, and saving the processes running on your computer.
 
 https://user-images.githubusercontent.com/31383711/199861204-d952435a-8b1f-4d94-84d1-3ee60422d523.mp4
 

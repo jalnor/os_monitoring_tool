@@ -38,7 +38,7 @@ def destroyer():
 
 class MainUi:
     root = tk.Tk()
-    root.geometry('1024x768')
+    root.geometry('%dx%d' % (root.winfo_screenwidth(), root.winfo_screenheight()))
     root.title('OS Monitoring Tool')
     root.protocol("WM_DELETE_WINDOW", destroyer)
     menubar = create_menubar(root)

@@ -12,8 +12,8 @@ A Python tool that monitors processes as they start and stop. It utilizes a sepa
 * Pip (Which comes with Python)
 * Database (Sqlite is the default but if you want to use another DBMS you can find instructions in the [.env-template](https://github.com/jalnor/os_monitoring_tool/blob/main/.env-template) file)
 
-
 ### Poetry Installation
+---
 Per the [documentation](https://python-poetry.org/docs/), Poetry is a dependency management and packaging tool.
 
 ##### Note: You can follow the instructions on their [website](https://python-poetry.org/docs/) to install poetry.
@@ -39,6 +39,13 @@ Once the dependencies are installed and the .env file are in place, you can run 
 ``` poetry run python main.py```
 
 That is it, the app should be up and running at this point, capturing, and saving the processes running on your computer.
+
+### Install Dependencies Using PIP
+---
+This project contains a requirements.txt file. To install them using pip:
+```
+pip install -r requirements.txt
+```
 
 https://user-images.githubusercontent.com/31383711/199861204-d952435a-8b1f-4d94-84d1-3ee60422d523.mp4
 

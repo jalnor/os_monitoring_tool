@@ -1,4 +1,4 @@
-## Python Installation ![python-logo-evensmaller](https://user-images.githubusercontent.com/31383711/200034228-92eebe7f-ce3b-4bf9-a7b2-1e314d5683bb.png)
+# Python Installation ![python-logo-evensmaller](https://user-images.githubusercontent.com/31383711/200034228-92eebe7f-ce3b-4bf9-a7b2-1e314d5683bb.png)
 ---
 Alternatively: you can use [pyenv](https://github.com/pyenv/pyenv) to manage your Python installations. If you do, you can skip this 'Python Installation' section and go to ['Setup Virtual Environment'](https://github.com/jalnor/os_monitoring_tool/edit/main/README.md#setup-virtual-environment).
 

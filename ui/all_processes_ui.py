@@ -15,7 +15,7 @@ from tkhtmlview import HTMLLabel
 import matplotlib.pyplot as plt
 
 from db import my_db
-from db.web_data import WebData
+from db import web_data as wd
 from db.graphs import Graph
 from db.pybites_timer import timing
 
@@ -31,25 +31,34 @@ def constant_secondary_tab_headers():
     return 'PID', 'Status', 'Start Time', 'Capture Time'
 
 
-def get_web_data(selection) -> str:
-    return WebData.get_web_data(WebData, selection[0][1])
-
 
 # TODO update this functions sorting
 def sortby(tree, col, descending):
     """sort tree contents when a column header is clicked on"""
     # grab values to sort
-    data = [(tree.set(child, col), child) \
+    data = [(tree.set(child, col), child)
             for child in tree.get_children('')]
-    # if the data to be sorted is numeric change to float
-    # if data.isnumeric():
-    #     data =  change_numeric(data)
     # now sort the data in place
     data.sort(reverse=descending)
-    for ix, item in enumerate(data):
-        tree.move(item[1], '', ix)
+    for index, item in enumerate(data):
+        tree.move(item[1], '', index)
     # switch the heading so it will sort in the opposite direction
     tree.heading(col, command=lambda col=col: sortby(tree, col, int(not descending)))
+    # # Add sorted column to sorted tuple
+    # return (tree, col, descending)
+
+
+def adjust_column_width(tree, headers, item):
+    # adjust column's width if necessary to fit each value
+    for ix, val in enumerate(item):
+        if val is not None:
+            col_w = tkFont.Font().measure(val)
+        if tree.column(headers[ix], width=None) < col_w:
+            tree.column(headers[ix], width=col_w)
+
+
+def adjust_column_headers(tree, item):
+    tree.column(item, width=tkFont.Font().measure(item.title()))
 
 
 class AllProcesses(object):
@@ -67,6 +76,7 @@ class AllProcesses(object):
         self.refresh_data()
         self.style = ttk.Style()
         self.select_os_theme()
+        self.sorted: tuple = ('tree', 'column', 'order')
 
     def select_os_theme(self):
         # Check which style to apply, WILL ADD MORE LATER AND THESE MAY NEED ADJUSTING
@@ -102,60 +112,66 @@ to change width of column drag boundary
         for col in constant_main_tab_headers():
             self.tree.heading(col, text=col.title(), command=lambda c=col: sortby(self.tree, c, 0))
             # adjust the column's width to the header string
-            self.adjust_column_headers(self.tree, col)
+            adjust_column_headers(self.tree, col)
 
         for item in self.processes:
             if item[0]:
                 self.tree.insert('', 'end', values=item)
-                self.adjust_column_width(self.tree, constant_main_tab_headers(), item)
+                adjust_column_width(self.tree, constant_main_tab_headers(), item)
 
-    def adjust_column_headers(self, tree, item):
-        tree.column(item, width=tkFont.Font().measure(item.title()))
+    def delete_tree_items(self):
+        """Delete existing values"""
+        if self.tree.get_children():
+            for item in self.tree.get_children():
+                self.tree.delete(item)
 
-    def adjust_column_width(self, tree, headers, item):
-        # adjust column's width if necessary to fit each value
-        for ix, val in enumerate(item):
-            if val is not None:
-                col_w = tkFont.Font().measure(val)
-            if tree.column(headers[ix], width=None) < col_w:
-                tree.column(headers[ix], width=col_w)
+    def rebuild_tree(self):
+        """Rebuild tree with new process list."""
+        db_ids = [process[0] for process in self.processes]
+        if db_ids:
+            self._build_tree()
 
     # @timing
     def refresh_data(self):
+        """Fetch latest data from database."""
         # TODO get sorted state and maintain it after refresh
         # Get new processes from db
         self.processes = self.db.get_all_processes()
         self.processes.sort(key=lambda x: x[5], reverse=True)
 
-        # Delete existing values and replace them when tree is rebuilt
-        if self.tree.get_children():
-            for item in self.tree.get_children():
-                self.tree.delete(item)
+        self.delete_tree_items()
+        self.rebuild_tree()
 
-        db_ids = [process[0] for process in self.processes]
-        if db_ids:
-            self._build_tree()
         # Call the function after five seconds to refresh data
         self.processes_container.after(WAIT_TIME, self.refresh_data)
 
-    # Change focus to the new tab
     # @timing
     def on_change_tab(self, proc_tab):
+        """Change to new tab on creation.
+
+        Keyword arguments:
+        proc_tab -- the newly created tab
+        """
         self.parent.select(proc_tab)
 
     # @timing
     def close_current_tab(self, fig):
+        """Close the current tab.
+
+        Keyword arguments:
+        fig -- the matplotlib graph
+        """
         plt.close(fig)
         self.parent.forget("current")
 
     @timing
     def open_in_new_tab(self, event):
         result = event.widget
-        graph = Graph(figsize=(1, 2), layout='constrained', dpi=100)
-        # fig, ax = plt.subplots(figsize=(8, 3), layout='constrained', dpi=100)
+        graph = Graph(figsize=(1, 1), layout='constrained', dpi=75)
+
         # selection is now a list of the values from process
         selection = [result.item(item)['values'] for item in result.selection()]
-
+        # TODO implement combobox selection for time period, make graph zoomable, seekable
         yesterday = dt.now() - timedelta(hours=24)
         hour = dt.now() - timedelta(hours=1)
         print('Time difference: ', (dt.now() - hour))
@@ -166,11 +182,13 @@ to change width of column drag boundary
         print('Length of data: ', len(graph.data_for_process))
         frame2 = ttk.Frame(self.parent, width=1024, height=768)
         frame2.grid(column=0, row=0, sticky='nsew')
+        frame2.grid_columnconfigure(0, weight=1)
         self.parent.add(frame2, text=selection[0][1])
         self.on_change_tab(frame2)
 
         process_container = ttk.Frame(frame2, width=1024, height=768, padding=5, relief='sunken')
         process_container.grid(column=0, row=0, sticky='nsew')
+        process_container.grid_columnconfigure(0, weight=1)
         # Button and headings for top sections
         close_button = ttk.Button(process_container, text="Close", command=lambda: self.close_current_tab(graph.fig))
         close_button.grid(column=0, row=0, sticky='w')
@@ -180,14 +198,17 @@ to change width of column drag boundary
         # Column 1 frame with current process name and id
         name_frame = ttk.Frame(process_container, width=150, height=350,
                                padding=5, borderwidth=5, relief='flat')
-        name_frame.grid(column=1, row=1, sticky='nsew')
+        name_frame.grid(column=1, row=1, sticky='ne')
+        name_frame.grid_columnconfigure(0, weight=1)
 
-        ttk.Label(name_frame, text=selection[0][0], justify='center').grid(column=1, row=1)
-        ttk.Label(name_frame, text=selection[0][1], justify='center').grid(column=1, row=2)
+        ttk.Label(name_frame, text=selection[0][0], justify='center').grid(column=1, row=1, sticky='nsew')
+        ttk.Label(name_frame, text=selection[0][1], justify='center').grid(column=1, row=2, sticky='nsew')
 
         # Create the data frame and tree to display logs
-        data_frame = ttk.Frame(process_container, width=700, height=350, padding=5, borderwidth=5, relief='flat')
+        data_frame = ttk.Frame(process_container, width=700, height=250, padding=5, borderwidth=5, relief='flat')
         data_frame.grid(column=2, columnspan=4, row=1, sticky='nsew')
+        data_frame.grid_columnconfigure(0, weight=1)
+        data_frame.grid_rowconfigure(0, weight=1)
         data_tree = ttk.Treeview(data_frame, columns=constant_secondary_tab_headers(), show='headings')
         data_tree.grid(column=0, row=0, in_=data_frame)
 
@@ -197,15 +218,17 @@ to change width of column drag boundary
         for header in constant_secondary_tab_headers():
             data_tree.heading(header, text=header.title(),
                               command=lambda c=header: sortby(data_tree, c, 0))
-            self.adjust_column_headers(data_tree, header)
+            adjust_column_headers(data_tree, header)
 
         for data in graph.data_for_process:
             data_tree.insert('', 'end', values=data)
-            self.adjust_column_width(data_tree, constant_secondary_tab_headers(), data)
+            adjust_column_width(data_tree, constant_secondary_tab_headers(), data)
 
         graph_frame = ttk.Frame(process_container, width=1000, height=150, padding=5, borderwidth=5, relief='sunken')
-        graph_frame.grid(column=0, columnspan=6, row=5, sticky='nsew')
 
+        graph_frame.grid(column=0, columnspan=6, row=5, sticky='nsew')
+        graph_frame.grid_columnconfigure(0, weight=1)
+        graph_frame.grid_rowconfigure(0, weight=1)
         graph.list_of_statuses = [(1 if dt[1] == 'running' else 0) for dt in graph.data_for_process]
 
         graph.set_major_stuff()
@@ -214,23 +237,28 @@ to change width of column drag boundary
         canvas.get_tk_widget().pack()
 
         text_frame = ttk.Frame(process_container, width=1900, height=150, padding=5, borderwidth=5, relief='sunken')
-        text_frame.grid(column=0, row=6, sticky='nsew')
+        text_frame.grid(column=0, columnspan=6, row=6, sticky='nsew')
+        text_frame.grid_columnconfigure(0, weight=1)
+        text_frame.grid_rowconfigure(0, weight=1)
+        #
+        text_canvas = tk.Canvas(text_frame, width=1800, height=150, borderwidth=2, relief='sunken')
+        text_canvas.grid(column=0, columnspan=6, row=0, rowspan=3, sticky='nsew')
+        text_canvas.grid_columnconfigure(0, weight=1)
+        text_canvas.grid_rowconfigure(0, weight=1)
 
-        text_canvas = ttk.Frame(text_frame, width=875, height=150, padding=2, borderwidth=2, relief='sunken')
-        text_canvas.grid(column=0, row=0, sticky='nsew')
-
-        web_data = WebData.get_web_data(WebData, process_name=selection[0][1], os_name=self.os_name)
-        web_data = web_data.splitlines('\n')
-
-        main_label = tk.Text(text_canvas, text=''.join(web_data[:-1]), padding=2, wraplength=950)
-        main_label.grid(column=0, row=0)
-
-        vsb = ttk.Scrollbar(orient="vertical", command=main_label.yview())
-        hsb = ttk.Scrollbar(orient="horizontal", command=main_label.xview())
-        vsb.grid(column=1, row=0, sticky='ns', in_=text_canvas)
-        hsb.grid(column=1, row=1, sticky='ew', in_=text_canvas)
+        web_data = wd.get_web_data(process_name=selection[0][1], os_name=self.os_name)
+        web_data = web_data.split('\n')
+        main_label = tk.Text()
+        main_label = ttk.Label(text_canvas, text=''.join(web_data[:-1]), padding=4, wraplength=1700)
+        main_label.grid(column=0, row=1)
+        main_label.grid_columnconfigure(0, weight=1)
         my_label = HTMLLabel(text_canvas, html=''.join(web_data[-1:]))
-        my_label.grid(column=0, row=1)
+        my_label.grid(column=0, row=2)
+
+        # vsb = ttk.Scrollbar(orient="vertical", command=text_canvas.yview())
+        # hsb = ttk.Scrollbar(orient="horizontal", command=text_canvas.xview())
+        # vsb.grid(column=1, row=0, sticky='ns', in_=text_canvas)
+        # hsb.grid(column=0, row=1, sticky='ew', in_=text_canvas)
 
         process_container.pack(fill="both", expand=True)
         for child in process_container.winfo_children():

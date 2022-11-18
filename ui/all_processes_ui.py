@@ -20,22 +20,19 @@ from db.graphs import Graph
 from db.pybites_timer import timing
 
 
-WAIT_TIME = 5000
-
-
 def constant_main_tab_headers():
+    """Define main window header names"""
     return 'ID', 'Name', 'Status', 'PID', 'Start Time', 'Capture Time'
 
 
 def constant_secondary_tab_headers():
+    """Define process tab header names"""
     return 'PID', 'Status', 'Start Time', 'Capture Time'
-
 
 
 # TODO update this functions sorting
 def sortby(tree, col, descending):
     """sort tree contents when a column header is clicked on"""
-    # grab values to sort
     data = [(tree.set(child, col), child)
             for child in tree.get_children('')]
     # now sort the data in place
@@ -49,7 +46,7 @@ def sortby(tree, col, descending):
 
 
 def adjust_column_width(tree, headers, item):
-    # adjust column's width if necessary to fit each value
+    """Adjust column widths"""
     for ix, val in enumerate(item):
         if val is not None:
             col_w = tkFont.Font().measure(val)
@@ -79,7 +76,7 @@ class AllProcesses(object):
         self.sorted: tuple = ('tree', 'column', 'order')
 
     def select_os_theme(self):
-        # Check which style to apply, WILL ADD MORE LATER AND THESE MAY NEED ADJUSTING
+        """Set the style of the widgets based on user os."""
         os_platform = platform.system()
         if os_platform == 'Windows':
             if self.os_name == 'nt':
@@ -88,6 +85,7 @@ class AllProcesses(object):
             self.style.theme_use('aqua')
 
     def _setup_widgets(self):
+        """Set up the components of the notebook tab."""
         information = """click on header to sort by that column
 to change width of column drag boundary
         """
@@ -109,6 +107,7 @@ to change width of column drag boundary
 
     # @timing
     def _build_tree(self):
+        """Build the ttk.treeview setting columns and adding data."""
         for col in constant_main_tab_headers():
             self.tree.heading(col, text=col.title(), command=lambda c=col: sortby(self.tree, c, 0))
             # adjust the column's width to the header string
@@ -134,8 +133,8 @@ to change width of column drag boundary
     # @timing
     def refresh_data(self):
         """Fetch latest data from database."""
+        wait_time = 5000
         # TODO get sorted state and maintain it after refresh
-        # Get new processes from db
         self.processes = self.db.get_all_processes()
         self.processes.sort(key=lambda x: x[5], reverse=True)
 
@@ -143,7 +142,7 @@ to change width of column drag boundary
         self.rebuild_tree()
 
         # Call the function after five seconds to refresh data
-        self.processes_container.after(WAIT_TIME, self.refresh_data)
+        self.processes_container.after(wait_time, self.refresh_data)
 
     # @timing
     def on_change_tab(self, proc_tab):

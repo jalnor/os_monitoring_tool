@@ -6,6 +6,7 @@ from ui.all_processes_ui import AllProcesses
 
 
 def create_notebook(parent):
+    """Create ttk notebook"""
     n = ttk.Notebook(parent)
     n.pack(fill='both', pady=3, padx=3, expand=True)
     n.configure(width=1024, height=768)
@@ -18,6 +19,7 @@ def create_notebook(parent):
 
 # TODO create functions for menu options
 def create_menubar(parent) -> tk.Menu:
+    """Create menubar for main window"""
     menubar = tk.Menu(parent)
     # Add menus
     menu_file = tk.Menu(menubar, tearoff=0)
@@ -33,12 +35,15 @@ def create_menubar(parent) -> tk.Menu:
 
 
 def destroyer():
+    """Destroy all processes associated with app on close."""
     sys.exit()
 
 
 class MainUi:
+    """Create main window and start loop."""
     root = tk.Tk()
-    root.geometry('%dx%d' % (root.winfo_screenwidth(), root.winfo_screenheight()))
+    # root.geometry('%dx%d' % (root.winfo_screenwidth(), root.winfo_screenheight()))
+    root.geometry(f'{root.winfo_screenwidth()}x{root.winfo_screenheight()}')
     root.title('OS Monitoring Tool')
     root.protocol("WM_DELETE_WINDOW", destroyer)
     menubar = create_menubar(root)

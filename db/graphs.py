@@ -8,10 +8,9 @@ matplotlib.use('TkAgg')
 
 
 class Graph:
-    def __init__(self, **kwargs):
-        print(kwargs)
-        self.fig, self.ax = plt.subplots(figsize=kwargs.get('fig_size'), layout=kwargs.get('layout'),
-                                         dpi=kwargs.get('dpi'), sharey=True)
+    def __init__(self, figsize: tuple, layout: str, dpi: int):
+        self.fig, self.ax = plt.subplots(figsize=figsize, layout=layout,
+                                         dpi=dpi)
         self.data_for_process = []
         self.list_of_statuses = []
         self.ax2 = self.ax.twiny()

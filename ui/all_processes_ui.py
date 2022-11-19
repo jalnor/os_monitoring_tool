@@ -140,7 +140,6 @@ to change width of column drag boundary
 
         self.delete_tree_items()
         self.rebuild_tree()
-
         # Call the function after five seconds to refresh data
         self.processes_container.after(wait_time, self.refresh_data)
 
@@ -166,99 +165,122 @@ to change width of column drag boundary
     @timing
     def open_in_new_tab(self, event):
         result = event.widget
-        graph = Graph(figsize=(1, 1), layout='constrained', dpi=75)
-
         # selection is now a list of the values from process
         selection = [result.item(item)['values'] for item in result.selection()]
-        # TODO implement combobox selection for time period, make graph zoomable, seekable
-        yesterday = dt.now() - timedelta(hours=24)
-        hour = dt.now() - timedelta(hours=1)
-        print('Time difference: ', (dt.now() - hour))
-        # Get data relating to process
-        """ Not working correctly """
-        graph.data_for_process = self.db.get_process_data(selection[0][0], hour, dt.now())
-        graph.data_for_process.sort(key=lambda x: x[3], reverse=True)
-        print('Length of data: ', len(graph.data_for_process))
-        frame2 = ttk.Frame(self.parent, width=1024, height=768)
-        frame2.grid(column=0, row=0, sticky='nsew')
-        frame2.grid_columnconfigure(0, weight=1)
-        self.parent.add(frame2, text=selection[0][1])
-        self.on_change_tab(frame2)
+        if selection:  # Fixes console error on refresh
+            frame2 = ttk.Frame(self.parent, width=1024, height=768)
+            frame2.grid(column=0, row=0, padx=5, pady=5, sticky='nsew')
+            frame2.grid_columnconfigure(0, weight=1)
+            self.parent.add(frame2, text=selection[0][1])
+            self.on_change_tab(frame2)
 
-        process_container = ttk.Frame(frame2, width=1024, height=768, padding=5, relief='sunken')
-        process_container.grid(column=0, row=0, sticky='nsew')
-        process_container.grid_columnconfigure(0, weight=1)
-        # Button and headings for top sections
-        close_button = ttk.Button(process_container, text="Close", command=lambda: self.close_current_tab(graph.fig))
-        close_button.grid(column=0, row=0, sticky='w')
-        ttk.Label(process_container, text="Current Process", padding=2).grid(column=1, row=0, sticky='w')
-        ttk.Label(process_container, text="Process History", padding=2).grid(column=2, row=0, sticky='w')
+            process_container = ttk.Frame(frame2, width=1024, height=768, padding=5, relief='sunken')
 
-        # Column 1 frame with current process name and id
-        name_frame = ttk.Frame(process_container, width=150, height=350,
-                               padding=5, borderwidth=5, relief='flat')
-        name_frame.grid(column=1, row=1, sticky='ne')
-        name_frame.grid_columnconfigure(0, weight=1)
+            process_container.grid(column=0, row=0, sticky='nsew')
+            process_container.grid_columnconfigure(0, weight=1)
 
-        ttk.Label(name_frame, text=selection[0][0], justify='center').grid(column=1, row=1, sticky='nsew')
-        ttk.Label(name_frame, text=selection[0][1], justify='center').grid(column=1, row=2, sticky='nsew')
+            # Button and headings for top sections columns 1, 2, 3 respectively & row 0
+            close_button = ttk.Button(process_container, text="Close",
+                                      command=lambda: self.close_current_tab(graph.fig))
+            close_button.grid(column=0, row=0, sticky='w')
+            ttk.Label(process_container, text="Current Process", padding=2).grid(column=1, row=0, sticky='w')
+            ttk.Label(process_container, text="Process History", padding=2).grid(column=2, row=0, sticky='w')
 
-        # Create the data frame and tree to display logs
-        data_frame = ttk.Frame(process_container, width=700, height=250, padding=5, borderwidth=5, relief='flat')
-        data_frame.grid(column=2, columnspan=4, row=1, sticky='nsew')
-        data_frame.grid_columnconfigure(0, weight=1)
-        data_frame.grid_rowconfigure(0, weight=1)
-        data_tree = ttk.Treeview(data_frame, columns=constant_secondary_tab_headers(), show='headings')
-        data_tree.grid(column=0, row=0, in_=data_frame)
+            graph = Graph(figsize=(8, 3), layout='constrained', dpi=100)
 
-        data_frame.grid_columnconfigure(0, weight=1)
-        data_frame.grid_rowconfigure(0, weight=1)
+            # TODO implement combobox selection for time period, make graph zoomable, seekable
+            yesterday = dt.now() - timedelta(hours=24)
+            hour = dt.now() - timedelta(hours=1)
+            print('Time difference: ', (dt.now() - hour))
+            # Get data relating to process
+            """ Not working correctly """
+            graph.data_for_process = self.db.get_process_data(selection[0][0], hour, dt.now())
+            graph.data_for_process.sort(key=lambda x: x[3], reverse=True)
+            print('Length of data: ', len(graph.data_for_process))
 
-        for header in constant_secondary_tab_headers():
-            data_tree.heading(header, text=header.title(),
-                              command=lambda c=header: sortby(data_tree, c, 0))
-            adjust_column_headers(data_tree, header)
+            # Column 0, row 1, Combo boxes for graph selection, Graph starts at past hour
 
-        for data in graph.data_for_process:
-            data_tree.insert('', 'end', values=data)
-            adjust_column_width(data_tree, constant_secondary_tab_headers(), data)
+            graph_selection_frame = ttk.Frame(process_container, width=200, height=250, padding=5)
+            print(graph_selection_frame['style'], ' ', graph_selection_frame.winfo_class())
+            graph_selection_frame.grid(column=0, row=1, sticky='nsew')
+            graph_selection_frame.grid_columnconfigure(0, weight=1)
+            graph_selection_frame.grid_rowconfigure(0, weight=1)
+            graph_selection_frame['style'] = 'Graph.TFrame'
+            graph_selection_style = ttk.Style()
+            graph_selection_style.configure("Graph.TFrame", background="lightblue")
+            selected = tk.StringVar()
+            graph_combobox = ttk.Combobox(graph_selection_frame, width=10, textvariable=selected)
+            graph_combobox['values'] = ('1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12')
+            graph_combobox.grid(column=0, row=0, pady=5, padx=5)
+            graph_combobox.current(newindex=1)
 
-        graph_frame = ttk.Frame(process_container, width=1000, height=150, padding=5, borderwidth=5, relief='sunken')
+            # Column 1, row 1 frame with current process name and id
+            name_frame = ttk.Frame(process_container, width=150, height=250,
+                                   padding=5, borderwidth=5, relief='flat')
+            name_frame.grid(column=1, row=1, sticky='ne')
+            name_frame.grid_columnconfigure(0, weight=1)
 
-        graph_frame.grid(column=0, columnspan=6, row=5, sticky='nsew')
-        graph_frame.grid_columnconfigure(0, weight=1)
-        graph_frame.grid_rowconfigure(0, weight=1)
-        graph.list_of_statuses = [(1 if dt[1] == 'running' else 0) for dt in graph.data_for_process]
+            ttk.Label(name_frame, text=selection[0][0], justify='center').grid(column=1, row=1, sticky='nsew')
+            ttk.Label(name_frame, text=selection[0][1], justify='center').grid(column=1, row=2, sticky='nsew')
 
-        graph.set_major_stuff()
-        canvas = graph.set_frame(graph_frame)
-        canvas.draw()
-        canvas.get_tk_widget().pack()
+            # Create the data frame and tree to display logs
+            data_frame = ttk.Frame(process_container, width=700, height=250, padding=5, borderwidth=5, relief='flat')
+            data_frame.grid(column=2, columnspan=4, row=1, sticky='nsew')
+            data_frame.grid_columnconfigure(0, weight=1)
+            data_frame.grid_rowconfigure(0, weight=1)
+            data_tree = ttk.Treeview(data_frame, columns=constant_secondary_tab_headers(), show='headings')
+            data_tree.grid(column=0, row=0, in_=data_frame)
 
-        text_frame = ttk.Frame(process_container, width=1900, height=150, padding=5, borderwidth=5, relief='sunken')
-        text_frame.grid(column=0, columnspan=6, row=6, sticky='nsew')
-        text_frame.grid_columnconfigure(0, weight=1)
-        text_frame.grid_rowconfigure(0, weight=1)
-        #
-        text_canvas = tk.Canvas(text_frame, width=1800, height=150, borderwidth=2, relief='sunken')
-        text_canvas.grid(column=0, columnspan=6, row=0, rowspan=3, sticky='nsew')
-        text_canvas.grid_columnconfigure(0, weight=1)
-        text_canvas.grid_rowconfigure(0, weight=1)
+            data_frame.grid_columnconfigure(0, weight=1)
+            data_frame.grid_rowconfigure(0, weight=1)
 
-        web_data = wd.get_web_data(process_name=selection[0][1], os_name=self.os_name)
-        web_data = web_data.split('\n')
-        main_label = tk.Text()
-        main_label = ttk.Label(text_canvas, text=''.join(web_data[:-1]), padding=4, wraplength=1700)
-        main_label.grid(column=0, row=1)
-        main_label.grid_columnconfigure(0, weight=1)
-        my_label = HTMLLabel(text_canvas, html=''.join(web_data[-1:]))
-        my_label.grid(column=0, row=2)
+            for header in constant_secondary_tab_headers():
+                data_tree.heading(header, text=header.title(),
+                                  command=lambda c=header: sortby(data_tree, c, 0))
+                adjust_column_headers(data_tree, header)
 
-        # vsb = ttk.Scrollbar(orient="vertical", command=text_canvas.yview())
-        # hsb = ttk.Scrollbar(orient="horizontal", command=text_canvas.xview())
-        # vsb.grid(column=1, row=0, sticky='ns', in_=text_canvas)
-        # hsb.grid(column=0, row=1, sticky='ew', in_=text_canvas)
+            for data in graph.data_for_process:
+                data_tree.insert('', 'end', values=data)
+                adjust_column_width(data_tree, constant_secondary_tab_headers(), data)
 
-        process_container.pack(fill="both", expand=True)
-        for child in process_container.winfo_children():
-            child.grid_configure(padx=5, pady=5)
+            graph_frame = ttk.Frame(process_container, width=1000, height=500, padding=5, borderwidth=5,
+                                    relief='sunken')
+
+            graph_frame.grid(column=0, columnspan=6, row=5, sticky='nsew')
+            graph_frame.grid_columnconfigure(0, weight=1)
+            graph_frame.grid_rowconfigure(0, weight=1)
+            graph.list_of_statuses = [(1 if dt[1] == 'running' else 0) for dt in graph.data_for_process]
+
+            graph.set_major_stuff()
+            canvas = graph.set_frame(graph_frame)
+            canvas.draw()
+            canvas.get_tk_widget().pack()
+
+            text_frame = ttk.Frame(process_container, width=1900, height=150, padding=5, borderwidth=5, relief='sunken')
+            text_frame.grid(column=0, columnspan=6, row=6, sticky='nsew')
+            text_frame.grid_columnconfigure(0, weight=1)
+            text_frame.grid_rowconfigure(0, weight=1)
+
+            text_frame_style = ttk.Style()
+
+            web_data = wd.get_web_data(process_name=selection[0][1], os_name=self.os_name)
+            print('Length of webdata: ', len(web_data), ' Type: ', type(web_data))
+            print(web_data)
+            web_data = web_data.split('\\n')
+            print('Length of webdata: ', len(web_data), ' Type: ', type(web_data))
+            label_text = ''.join(web_data[0:-1])
+            print('Without tag: ', web_data[0:-1], ' With tag: ',
+                  type(str(web_data[-1:]).replace('\'', '').replace('"', '')))
+            main_label = ttk.Label(text_frame, width=1000, text=label_text, padding=10, font=('Arial', 14),
+                                   justify='center', wraplength=1600)
+            main_label.grid(column=0, columnspan=6, row=1, in_=text_frame)
+            main_label.grid_columnconfigure(0, weight=1)
+            main_label['style'] = 'Webdata.TLabel'
+            text_frame_style.configure('Webdata.TLabel', size=14)
+
+            my_label = HTMLLabel(text_frame, html=''.join(web_data[-1:]).replace('\'', '').replace('"', ''))
+            my_label.grid(column=0, row=2, in_=text_frame)
+
+            process_container.pack(fill="both", expand=True)
+            for child in process_container.winfo_children():
+                child.grid_configure(padx=5, pady=5)

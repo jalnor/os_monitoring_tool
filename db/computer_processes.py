@@ -10,6 +10,7 @@ from dotenv import load_dotenv
 
 from db.models import Process, LogHistory, CurrentLog
 from db.pybites_timer import timing
+from util.file_logger import SaveMessage
 
 load_dotenv()
 
@@ -42,12 +43,14 @@ def get_os_processes():
 
 
 class ComputerProcesses:
+    """Captures the running processes and saves or updates them in the database."""
 
     def __init__(self):
         self.db_url = os.environ["db_url"]
         self.engine = create_engine(self.db_url, echo=False)
         self.create_db_and_tables()
         self.list_of_current_processes = []
+        self.save = SaveMessage()
 
     def __call__(self):
         os_processes = get_os_processes()
@@ -234,7 +237,6 @@ if __name__ == "__main__":
     cp()
     start_time = round(time.time())
     while True:
-        # print('Time...', str((round(time.time()) - start_time) % 10))
         if (round(time.time()) - start_time) % 5 == 0:
             # print('Updating...')
             cp()

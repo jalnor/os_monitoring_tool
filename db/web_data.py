@@ -1,4 +1,5 @@
 import os
+import socket
 
 import requests
 
@@ -18,9 +19,11 @@ def get_web_data(process_name, os_name):
                "anim id est laborum."
 
     url = f'{os.environ["web_lookup"]}{process_name}&{os_name}'
-    response = requests.get(url)
     try:
+        response = requests.get(url)
         response.raise_for_status()
     except requests.exceptions.HTTPError as error:
-        return f'{error}\n\n{space_filler}'
+        return f'{str(error).split(":")[1:2]}\n\n{space_filler}'
+    except requests.exceptions.ConnectionError as error:
+        return f'{str(str(error).split(":")[1:2])[2:23] + ":"}\n\n{"Please check your internet connection."}'
     return response.text

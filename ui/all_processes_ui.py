@@ -30,21 +30,6 @@ def constant_secondary_tab_headers():
     return 'PID', 'Status', 'Start Time', 'Capture Time'
 
 
-# TODO update this functions sorting
-def sortby(tree, col, descending):
-    """sort tree contents when a column header is clicked on"""
-    data = [(tree.set(child, col), child)
-            for child in tree.get_children('')]
-    # now sort the data in place
-    data.sort(reverse=descending)
-    for index, item in enumerate(data):
-        tree.move(item[1], '', index)
-    # switch the heading so it will sort in the opposite direction
-    tree.heading(col, command=lambda col=col: sortby(tree, col, int(not descending)))
-    # # Add sorted column to sorted tuple
-    # return (tree, col, descending)
-
-
 def adjust_column_width(tree, headers, item):
     """Adjust column widths"""
     for ix, val in enumerate(item):
@@ -64,6 +49,7 @@ class AllProcesses(object):
     def __init__(self, processes_container, notebook_parent):
         self.os_name = os.name
         self.tree = None
+        self.sorted: list = [self.tree, 'Capture Time', 1]
         self.processes_container = processes_container
         self.parent = notebook_parent
         self.processes = []
@@ -73,7 +59,6 @@ class AllProcesses(object):
         self.refresh_data()
         self.style = ttk.Style()
         self.select_os_theme()
-        self.sorted: tuple = ('tree', 'column', 'order')
 
     def select_os_theme(self):
         """Set the style of the widgets based on user os."""
@@ -109,7 +94,7 @@ to change width of column drag boundary
     def _build_tree(self):
         """Build the ttk.treeview setting columns and adding data."""
         for col in constant_main_tab_headers():
-            self.tree.heading(col, text=col.title(), command=lambda c=col: sortby(self.tree, c, 0))
+            self.tree.heading(col, text=col.title(), command=lambda c=col: self.sortby(self.tree, c, 0))
             # adjust the column's width to the header string
             adjust_column_headers(self.tree, col)
 
@@ -117,6 +102,20 @@ to change width of column drag boundary
             if item[0]:
                 self.tree.insert('', 'end', values=item)
                 adjust_column_width(self.tree, constant_main_tab_headers(), item)
+
+    # TODO update this functions sorting
+    def sortby(self, tree, col, descending):
+        """sort tree contents when a column header is clicked on"""
+        data = [(tree.set(child, col), child)
+                for child in tree.get_children('')]
+        # now sort the data in place
+        data.sort(reverse=descending)
+        for index, item in enumerate(data):
+            tree.move(item[1], '', index)
+        # switch the heading so it will sort in the opposite direction
+        tree.heading(col, command=lambda col=col: self.sortby(tree, col, int(not descending)))
+        # Add sorted column to sorted tuple
+        self.sorted = [tree, col, descending]
 
     def delete_tree_items(self):
         """Delete existing values"""
@@ -134,12 +133,16 @@ to change width of column drag boundary
     def refresh_data(self):
         """Fetch latest data from database."""
         wait_time = 5000
-        # TODO get sorted state and maintain it after refresh
+
         self.processes = self.db.get_all_processes()
-        self.processes.sort(key=lambda x: x[5], reverse=True)
 
         self.delete_tree_items()
         self.rebuild_tree()
+
+        self.sorted[0] = self.tree
+
+        if self.tree is not None:
+            self.sortby(self.sorted[0], self.sorted[1], self.sorted[2])
         # Call the function after five seconds to refresh data
         self.processes_container.after(wait_time, self.refresh_data)
 

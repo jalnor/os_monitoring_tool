@@ -1,9 +1,12 @@
 import os
 
+from dotenv import load_dotenv
 from sqlmodel import Session, SQLModel, create_engine, select, and_
 
 from db.models import LogHistory, Process, CurrentLog
 from db.pybites_timer import timing
+
+load_dotenv()
 
 
 class MyDb:
@@ -24,8 +27,7 @@ class MyDb:
             logs = session.exec(select(LogHistory).where(and_(LogHistory.process_id == process_id,
                                                          LogHistory.captured <= till_time,
                                                          LogHistory.captured >= from_time))).fetchall()
-
-            return [(log.proc_id, log.status, log.started, log.captured) for log in logs]
+            return [(log.proc_id, log.status, log.started, log.captured, process_id) for log in logs]
 
     # @timing
     def get_all_processes(self) -> list[tuple]:
@@ -33,7 +35,8 @@ class MyDb:
         with Session(self.engine) as session:
             procs = session.exec(select(Process, CurrentLog).join(CurrentLog)
                                  .where(Process.id == CurrentLog.process_id))
-
+            n = [proc for proc in procs]
+            print('Logs: ', n[:5])
             return [(process.id, process.name, currentlog.status,
                      currentlog.proc_id, currentlog.started, currentlog.captured)
                     for process, currentlog in procs]

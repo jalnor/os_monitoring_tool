@@ -10,31 +10,55 @@ from dotenv import load_dotenv
 
 from db.models import Process, LogHistory, CurrentLog
 from db.pybites_timer import timing
+from util.file_logger import SaveMessage
 
 load_dotenv()
 
 
+def create_log_history(process_id, os_process) -> LogHistory:
+    return LogHistory(
+        proc_id=os_process.pid,
+        status=os_process.status(),
+        started=datetime.fromtimestamp(os_process.create_time()),
+        captured=datetime.now(),
+        process_id=process_id
+    )
+
+
+def create_current_log(process_id, os_process) -> CurrentLog:
+    return CurrentLog(
+        proc_id=os_process.pid,
+        status=os_process.status(),
+        started=datetime.fromtimestamp(os_process.create_time()),
+        captured=datetime.now(),
+        process_id=process_id
+    )
+
+
+def get_os_processes():
+    os_processes = [
+        process for process in psutil.process_iter(['name', 'pid', 'status'])
+    ]
+    return os_processes
+
+
 class ComputerProcesses:
+    """Captures the running processes and saves or updates them in the database."""
 
     def __init__(self):
         self.db_url = os.environ["db_url"]
         self.engine = create_engine(self.db_url, echo=False)
         self.create_db_and_tables()
         self.list_of_current_processes = []
+        self.save = SaveMessage()
 
     def __call__(self):
-        os_processes = self.get_os_processes()
+        os_processes = get_os_processes()
         cached_processes = self.get_cached_processes()
         self.update_processes_in_db(cached_processes, os_processes)
 
     def create_db_and_tables(self):
         SQLModel.metadata.create_all(self.engine)
-
-    def get_os_processes(self):
-        os_processes = [
-            process for process in psutil.process_iter(['name', 'pid', 'status'])
-        ]
-        return os_processes
 
     def get_cached_processes(self):
         with Session(self.engine) as session:
@@ -45,7 +69,6 @@ class ComputerProcesses:
             return {
                 (proc.name, int(log.proc_id)) for proc, log in cached_processes
             }
-
 
     def get_process(self, process_name) -> Optional[Process]:
         with Session(self.engine) as session:
@@ -58,7 +81,7 @@ class ComputerProcesses:
         with Session(self.engine) as session:
             return session.exec(select(CurrentLog).where(
                 CurrentLog.proc_id == pid and CurrentLog.process_id == process_id
-                )
+            )
             ).first()
 
     def get_log_entries_by_process_name_id(self, proc) -> Optional[CurrentLog]:
@@ -67,24 +90,6 @@ class ComputerProcesses:
                 select(CurrentLog).join(Process).where(Process.name == proc[0], CurrentLog.proc_id == proc[1])
             ).first()
             return logs
-
-    def create_log_history(self, process_id, os_process) -> LogHistory:
-        return LogHistory(
-            proc_id=os_process.pid,
-            status=os_process.status(),
-            started=datetime.fromtimestamp(os_process.create_time()),
-            captured=datetime.now(),
-            process_id=process_id
-        )
-
-    def create_current_log(self, process_id, os_process) -> CurrentLog:
-        return CurrentLog(
-            proc_id=os_process.pid,
-            status=os_process.status(),
-            started=datetime.fromtimestamp(os_process.create_time()),
-            captured=datetime.now(),
-            process_id=process_id
-        )
 
     # @timing
     def update_processes_in_db(self, cached_processes, os_processes):
@@ -110,10 +115,10 @@ class ComputerProcesses:
                             session.add(process)
                             session.commit()
                             # Add log entry at same time as process name for new process
-                            current_log = self.create_current_log(process.id, os_process)
+                            current_log = create_current_log(process.id, os_process)
                             session.add(current_log)
 
-                            log_history = self.create_log_history(process.id, os_process)
+                            log_history = create_log_history(process.id, os_process)
                             session.add(log_history)
 
                             session.commit()
@@ -127,11 +132,10 @@ class ComputerProcesses:
                         # This will keep process table small but create entries for different
                         # processes in LogHistory under same process_id, different pid
                         if not current_log:
-                            # print('Inside NO CURRENT LOG!: ', os_process)
-                            current_log = self.create_current_log(process.id, os_process)
+                            current_log = create_current_log(process.id, os_process)
                             session.add(current_log)
 
-                            log = self.create_log_history(process.id, os_process)
+                            log = create_log_history(process.id, os_process)
                             session.add(log)
 
                             session.commit()
@@ -145,7 +149,7 @@ class ComputerProcesses:
                             current_log.started = datetime.fromtimestamp(os_process.create_time())
                             session.add(current_log)
 
-                            log_history = self.create_log_history(process.id, os_process)
+                            log_history = create_log_history(process.id, os_process)
                             session.add(log_history)
 
                             session.commit()
@@ -173,10 +177,10 @@ class ComputerProcesses:
                             session.add(process)
                             session.commit()
 
-                        current_log = self.create_current_log(process.id, os_process)
+                        current_log = create_current_log(process.id, os_process)
                         session.add(current_log)
 
-                        log_history = self.create_log_history(process.id, os_process)
+                        log_history = create_log_history(process.id, os_process)
                         session.add(log_history)
 
                         session.commit()
@@ -233,7 +237,6 @@ if __name__ == "__main__":
     cp()
     start_time = round(time.time())
     while True:
-        # print('Time...', str((round(time.time()) - start_time) % 10))
         if (round(time.time()) - start_time) % 5 == 0:
             # print('Updating...')
             cp()

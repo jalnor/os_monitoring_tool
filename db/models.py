@@ -20,6 +20,8 @@ class Process(SQLModel, table=True):
     name: str = Field(index=True)
     log_start_stops: List["LogHistory"] = Relationship(back_populates="process")
 
+    def __str__(self):
+        return self.name
 
 class CurrentLog(SQLModel, table=True):
     """Defines the current log of process model."""
@@ -31,6 +33,9 @@ class CurrentLog(SQLModel, table=True):
     process_id: int = PROCESS_ID
     process: Process = RELATIONSHIP
 
+    def __str__(self):
+        return f'{self.proc_id} {self.status} {self.started} {self.captured} {self.process_id}'
+
 
 class LogHistory(SQLModel, table=True):
     """Defines the history of the process."""
@@ -41,3 +46,6 @@ class LogHistory(SQLModel, table=True):
     captured: datetime
     process_id: int = PROCESS_ID
     process: Process = RELATIONSHIP
+
+    def __str__(self):
+        return f'{self.proc_id} {self.status} {self.started} {self.captured} {self.process_id}'

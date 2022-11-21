@@ -38,14 +38,18 @@ Once the dependencies are installed and the .env file are in place, you can run 
 
 ``` poetry run python main.py```
 
-That is it, the app should be up and running at this point, capturing, and saving the processes running on your computer.
-
 ### Install Dependencies Using PIP
 ---
 This project contains a requirements.txt file. To install them using pip:
 ```
 pip install -r requirements.txt
 ```
+And then to run it with python open a terminal and navigate to the root directory and type:
+```
+python -m main
+```
+
+That is it, the app should be up and running at this point, capturing, and saving the processes running on your computer.
 
 https://user-images.githubusercontent.com/31383711/199861204-d952435a-8b1f-4d94-84d1-3ee60422d523.mp4
 

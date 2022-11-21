@@ -32,6 +32,7 @@ def constant_secondary_tab_headers():
 
 def adjust_column_width(tree, headers, item):
     """Adjust column widths"""
+    col_w = 8
     for ix, val in enumerate(item):
         if val is not None:
             col_w = tkFont.Font().measure(val)
@@ -198,11 +199,8 @@ to change width of column drag boundary
             # Get data relating to process
             """ Not working correctly """
             graph.data_for_process = self.db.get_process_data(selection[0][0], hour, dt.now())
-            graph.data_for_process.sort(key=lambda x: x[3], reverse=True)
-            print('Length of data: ', len(graph.data_for_process))
 
             # Column 0, row 1, Combo boxes for graph selection, Graph starts at past hour
-
             graph_selection_frame = ttk.Frame(process_container, width=200, height=250, padding=5)
             print(graph_selection_frame['style'], ' ', graph_selection_frame.winfo_class())
             graph_selection_frame.grid(column=0, row=1, sticky='nsew')
@@ -239,12 +237,12 @@ to change width of column drag boundary
 
             for header in constant_secondary_tab_headers():
                 data_tree.heading(header, text=header.title(),
-                                  command=lambda c=header: sortby(data_tree, c, 0))
+                                  command=lambda c=header: self.sortby(data_tree, c, 0))
                 adjust_column_headers(data_tree, header)
 
             for data in graph.data_for_process:
                 data_tree.insert('', 'end', values=data)
-                adjust_column_width(data_tree, constant_secondary_tab_headers(), data)
+                adjust_column_width(tree=data_tree, headers=constant_secondary_tab_headers(), item=data)
 
             graph_frame = ttk.Frame(process_container, width=1000, height=500, padding=5, borderwidth=5,
                                     relief='sunken')
@@ -267,13 +265,9 @@ to change width of column drag boundary
             text_frame_style = ttk.Style()
 
             web_data = wd.get_web_data(process_name=selection[0][1], os_name=self.os_name)
-            print('Length of webdata: ', len(web_data), ' Type: ', type(web_data))
-            print(web_data)
             web_data = web_data.split('\\n')
-            print('Length of webdata: ', len(web_data), ' Type: ', type(web_data))
+
             label_text = ''.join(web_data[0:-1])
-            print('Without tag: ', web_data[0:-1], ' With tag: ',
-                  type(str(web_data[-1:]).replace('\'', '').replace('"', '')))
             main_label = ttk.Label(text_frame, width=1000, text=label_text, padding=10, font=('Arial', 14),
                                    justify='center', wraplength=1600)
             main_label.grid(column=0, columnspan=6, row=1, in_=text_frame)

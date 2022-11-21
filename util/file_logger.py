@@ -6,8 +6,8 @@ formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
 
 
 class SaveMessage:
-    def __init__(self, *args, **kwargs):
-        self.fmt = formatter
+    def __init__(self, fmt=None, *args, **kwargs):
+        self.fmt = fmt
         self.args = args
         self.kwargs = kwargs
 

@@ -35,8 +35,6 @@ class MyDb:
         with Session(self.engine) as session:
             procs = session.exec(select(Process, CurrentLog).join(CurrentLog)
                                  .where(Process.id == CurrentLog.process_id))
-            n = [proc for proc in procs]
-            print('Logs: ', n[:5])
             return [(process.id, process.name, currentlog.status,
                      currentlog.proc_id, currentlog.started, currentlog.captured)
                     for process, currentlog in procs]

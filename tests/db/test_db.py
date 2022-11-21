@@ -27,7 +27,7 @@ def test_create_db(db_fixture):
 @pytest.mark.parametrize("fixture_log_history",
                          [
                              ('18440', 'stopped', datetime.datetime(2022, 11, 18, 20, 59, 00, 806054),
-                              datetime.datetime(2022, 11, 18, 21, 2, 27, 706142), 61),
+                              datetime.datetime(2022, 11, 18, 21, 2, 27, 706142)),
                          ])
 def test_get_process_data(db_fixture, time_fixture, fixture_log_history):
     print('From: ', time_fixture[0], " Till: ", time_fixture[1])

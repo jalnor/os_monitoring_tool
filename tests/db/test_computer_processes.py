@@ -4,9 +4,22 @@ import psutil
 import pytest
 import sqlmodel
 
-from db import computer_processes
+from db import computer_processes as cp
 from db.computer_processes import ComputerProcesses
 from db.models import CurrentLog, Process, LogHistory
+
+
+class FakeProcess:
+    def __init__(self, pid, status, create_time):
+        self.pid = pid
+        self.stat = status
+        self.created = create_time
+
+    def create_time(self):
+        return self.created
+
+    def status(self):
+        return self.stat
 
 
 @pytest.fixture(scope="session")
@@ -16,10 +29,10 @@ def computer_processes_fixture():
 
 @pytest.fixture
 def process_fixture():
-    process = psutil.Process
-    process.status = psutil.STATUS_STOPPED
-    process.started = datetime.datetime.timestamp(datetime.datetime(2022, 9, 17, 8, 2, 51, 945382))
-    return process
+    fake_process = FakeProcess('1234', 'stopped',
+                               datetime.datetime.timestamp(datetime.datetime(2022, 9, 17, 8, 2, 51, 945382)))
+    print('Inside process_fixture: ', fake_process.status())
+    return fake_process
 
 
 @pytest.fixture
@@ -44,7 +57,12 @@ def current_log_fixture():
     return current_log
 
 
-def test_create_log_history(log_history_fixture):
+def test_create_log_history(computer_processes_fixture, process_fixture, log_history_fixture):
+    log_history = cp.create_log_history(40, process_fixture)
+    assert isinstance(log_history, LogHistory)
+    assert log_history.proc_id == process_fixture.pid
+    assert log_history.status == process_fixture.status()
+    assert log_history.started == datetime.datetime.fromtimestamp(process_fixture.create_time())
     assert isinstance(log_history_fixture, LogHistory)
 
 

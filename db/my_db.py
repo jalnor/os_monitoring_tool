@@ -27,7 +27,7 @@ class MyDb:
             logs = session.exec(select(LogHistory).where(and_(LogHistory.process_id == process_id,
                                                          LogHistory.captured <= till_time,
                                                          LogHistory.captured >= from_time))).fetchall()
-            return [(log.proc_id, log.status, log.started, log.captured, process_id) for log in logs]
+            return [(log.proc_id, log.status, log.started, log.captured) for log in logs]
 
     # @timing
     def get_all_processes(self) -> list[tuple]:

@@ -1,4 +1,7 @@
 import datetime
+import os
+from pathlib import Path
+from unittest.mock import MagicMock
 
 import psutil
 import pytest
@@ -24,7 +27,17 @@ class FakeProcess:
 
 @pytest.fixture(scope="session")
 def computer_processes_fixture():
-    return ComputerProcesses()
+    return ComputerProcesses(db_url='sqlite:///testing.db')
+
+
+@pytest.fixture(scope="session")
+def os_processes_fixture():
+    return cp.get_os_processes()
+
+
+@pytest.fixture(scope="session")
+def get_cached_processes_fixture(computer_processes_fixture):
+    return computer_processes_fixture.get_cached_processes()
 
 
 @pytest.fixture
@@ -66,8 +79,37 @@ def test_create_log_history(computer_processes_fixture, process_fixture, log_his
     assert isinstance(log_history_fixture, LogHistory)
 
 
-def test_create_current_log(current_log_fixture):
+def test_create_current_log(process_fixture, current_log_fixture):
+    current_log = cp.create_current_log(1234, process_fixture)
+    assert current_log.proc_id == process_fixture.pid
+    assert current_log.status == process_fixture.status()
+    assert current_log.started == datetime.datetime.fromtimestamp(process_fixture.create_time())
     assert isinstance(current_log_fixture, CurrentLog)
+
+
+def test_add_processes_to_db(computer_processes_fixture):
+    if not Path('testing.db').exists():
+        current_processes = cp.get_os_processes()
+        computer_processes_fixture.add_processes_to_db(current_processes)
+        assert Path('testing.db').exists()
+    else:
+        assert Path('testing.db').exists()
+
+
+def test_get_os_processes(os_processes_fixture):
+    assert isinstance(os_processes_fixture[0], psutil.Process)
+    assert type(os_processes_fixture) == list
+
+
+def test_get_cached_processes(get_cached_processes_fixture):
+    assert type(get_cached_processes_fixture) == set
+    assert type(get_cached_processes_fixture.pop()) == tuple
+
+
+def test_log_entries_by_process_name_id(computer_processes_fixture):
+    log_entry = computer_processes_fixture.get_log_entries_by_process_name_id(('svchost.exe', 2772))
+    assert isinstance(log_entry, CurrentLog)
+    assert log_entry.status == 'running'
 
 
 @pytest.mark.parametrize("proc_id, status, started, captured, process_id",

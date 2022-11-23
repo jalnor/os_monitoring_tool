@@ -10,16 +10,18 @@ HELLO = 'Hello World!'
 
 def test_file_logger():
     frame = inspect.currentframe()
-    file_logger = fl.log_to_file(name=inspect.getframeinfo(frame).function, log_file='testing.log',
+    name = inspect.getframeinfo(frame)
+    file_logger = fl.log_to_file(name=name.function, log_file='testing.log',
                                  level=logging.DEBUG, file_handler=True)
     message = SaveMessage
-    file_logger.debug(msg=message(f'Expected output! {0}', HELLO).__str__())
+    file_logger.debug(msg=message(f'{name.function}: Expected output! {HELLO}').__str__())
     print(inspect.getframeinfo(frame).function)
     # assert isinstance(file_logger.name, )
 
 
 def test_console_logger():
     frame = inspect.currentframe()
-    console_logger = fl.log_to_file(name=inspect.getframeinfo(frame).function)
+    name = inspect.getframeinfo(frame)
+    console_logger = fl.log_to_file(name=name.function)
     message = SaveMessage
-    console_logger.debug(msg=message(f'This should print to console! {0}', HELLO).__str__())
+    console_logger.debug(msg=message(f'{name.function}: This should print to console! {HELLO}').__str__())

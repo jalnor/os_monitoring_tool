@@ -15,7 +15,7 @@ from tkhtmlview import HTMLLabel
 import matplotlib.pyplot as plt
 
 from db import my_db
-from db import web_data as wd
+from util import web_data as wd
 from db.graphs import Graph
 from db.pybites_timer import timing
 

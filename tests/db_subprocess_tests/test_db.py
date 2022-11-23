@@ -10,7 +10,7 @@ load_dotenv()
 
 @pytest.fixture
 def db_fixture():
-    return MyDb()
+    return MyDb(db_url='sqlite:///testing.db')
 
 
 @pytest.fixture
@@ -36,7 +36,8 @@ def test_get_process_data(db_fixture, time_fixture, fixture_log_history):
 
 
 @pytest.mark.parametrize("expected", [
-    (1, 'System Idle Process', 'running', '0', datetime.datetime(1969, 12, 31, 19, 0), datetime.datetime(2022, 9, 17, 19, 38, 13, 243291)),
+    (1, 'System Idle Process', 'running', '0', datetime.datetime(1969, 12, 31, 19, 0),
+     datetime.datetime(2022, 11, 21, 19, 56, 58, 298577)),
 ])
 def test_get_all_processes(db_fixture, expected):
     list_of_processes = db_fixture.get_all_processes()

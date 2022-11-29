@@ -26,7 +26,7 @@ class Graph:
         x_minor_floats = [float(x) for x in range(0, len(x_minor))]
 
         x_major = list(dict.fromkeys([str(dt[2]).split(' ')[0] for dt in self.data_for_process]))
-        count = 0
+
         for x in x_major:
             time_lists.append(
                 [y[2].time().strftime('%H:%M:%S') for y in self.data_for_process if str(y[2]).split(" ")[0] == x])

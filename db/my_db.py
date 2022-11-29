@@ -11,8 +11,8 @@ load_dotenv()
 
 class MyDb:
     """Defines the database interactions."""
-    def __init__(self):
-        self.db_url = os.environ["db_url"]
+    def __init__(self, db_url=None):
+        self.db_url = db_url or os.environ["db_url"]
         self.engine = create_engine(self.db_url, echo=False)
         self.create_db_and_tables()
 
@@ -38,3 +38,8 @@ class MyDb:
             return [(process.id, process.name, currentlog.status,
                      currentlog.proc_id, currentlog.started, currentlog.captured)
                     for process, currentlog in procs]
+
+    def get_log_history(self):
+        with Session(self.engine) as session:
+            log_histories = session.exec(select(LogHistory))
+            return [(log.proc_id, log.status, log.started, log.captured) for log in log_histories]

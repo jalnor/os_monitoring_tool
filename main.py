@@ -3,6 +3,8 @@ from subprocess import Popen
 from time import sleep
 from dotenv import load_dotenv
 
+import importlib.metadata
+
 load_dotenv()
 
 

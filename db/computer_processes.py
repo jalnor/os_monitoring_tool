@@ -163,7 +163,7 @@ class ComputerProcesses:
     def update_processes_in_db(self, cached_processes, os_processes):
         with Session(self.engine) as session:
             if cached_processes:
-                count = 0
+
                 for os_process in os_processes:
                     # more narrow exception: it seems .name() already hits the
                     # psutil exception, so in that case skip the rest
@@ -222,7 +222,6 @@ class ComputerProcesses:
                             session.commit()
                             continue
 
-                        count += 1
                     except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess, psutil.Error):
                         # TODO: add logging later
                         print("could not retrieve process name, skip")

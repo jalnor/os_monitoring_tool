@@ -161,7 +161,7 @@ def test_cp_main(computer_processes_fixture):
     db = MyDb(db_url='sqlite:///testing.db')
     num_records = len(db.get_log_history())
     start = datetime.datetime.now()
-    end = start + datetime.timedelta(seconds=30)
+    end = start + datetime.timedelta(seconds=15)
     run = computer_processes_fixture
     run()
     while datetime.datetime.now() <= end:

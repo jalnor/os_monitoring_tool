@@ -169,6 +169,7 @@ to change width of column drag boundary
     @timing
     def open_in_new_tab(self, event):
         result = event.widget
+
         # selection is now a list of the values from process
         selection = [result.item(item)['values'] for item in result.selection()]
         if selection:  # Fixes console error on refresh
@@ -253,9 +254,9 @@ to change width of column drag boundary
             graph.list_of_statuses = [(1 if dt[1] == 'running' else 0) for dt in graph.data_for_process]
 
             graph.set_major_stuff()
-            canvas = graph.set_frame(graph_frame)
-            canvas.draw()
-            canvas.get_tk_widget().pack()
+            graph_canvas = graph.set_frame(graph_frame)
+            graph_canvas.draw()
+            graph_canvas.get_tk_widget().pack()
 
             text_frame = ttk.Frame(process_container, width=1900, height=150, padding=5, borderwidth=5, relief='sunken')
             text_frame.grid(column=0, columnspan=6, row=6, sticky='nsew')

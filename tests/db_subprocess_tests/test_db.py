@@ -4,7 +4,7 @@ from unittest.mock import MagicMock
 import pytest
 from dotenv import load_dotenv
 
-from db.my_db import MyDb
+from src.db.my_db import MyDb
 
 load_dotenv()
 

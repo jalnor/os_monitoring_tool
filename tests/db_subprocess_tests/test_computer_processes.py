@@ -1,18 +1,14 @@
 import datetime
-import os
 import time
 from pathlib import Path
-from unittest.mock import MagicMock
 
 import psutil
 import pytest
-import sqlmodel
-from sqlmodel import Session, select
 
-from db import computer_processes as cp
-from db.computer_processes import ComputerProcesses
-from db.models import CurrentLog, Process, LogHistory
-from db.my_db import MyDb
+from src.db import computer_processes as cp
+from src.db import ComputerProcesses
+from src.db import CurrentLog, Process, LogHistory
+from src.db.my_db import MyDb
 
 
 class FakeProcess:

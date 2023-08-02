@@ -14,10 +14,10 @@ import tkinter.ttk as ttk
 from tkhtmlview import HTMLLabel
 import matplotlib.pyplot as plt
 
-from db import my_db
-from util import web_data as wd
-from db.graphs import Graph
-from db.pybites_timer import timing
+from src.db import my_db
+from src.util import web_data as wd
+from src.db.graphs import Graph
+from src.db.pybites_timer import timing
 
 
 def constant_main_tab_headers():
@@ -202,19 +202,19 @@ to change width of column drag boundary
             graph.data_for_process = self.db.get_process_data(selection[0][0], hour, dt.now())
 
             # Column 0, row 1, Combo boxes for graph selection, Graph starts at past hour
-            graph_selection_frame = ttk.Frame(process_container, width=200, height=250, padding=5)
-            print(graph_selection_frame['style'], ' ', graph_selection_frame.winfo_class())
-            graph_selection_frame.grid(column=0, row=1, sticky='nsew')
-            graph_selection_frame.grid_columnconfigure(0, weight=1)
-            graph_selection_frame.grid_rowconfigure(0, weight=1)
-            graph_selection_frame['style'] = 'Graph.TFrame'
-            graph_selection_style = ttk.Style()
-            graph_selection_style.configure("Graph.TFrame", background="lightblue")
-            selected = tk.StringVar()
-            graph_combobox = ttk.Combobox(graph_selection_frame, width=10, textvariable=selected)
-            graph_combobox['values'] = ('1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12')
-            graph_combobox.grid(column=0, row=0, pady=5, padx=5)
-            graph_combobox.current(newindex=1)
+            # graph_selection_frame = ttk.Frame(process_container, width=200, height=250, padding=5)
+            # print(graph_selection_frame['style'], ' ', graph_selection_frame.winfo_class())
+            # graph_selection_frame.grid(column=0, row=1, sticky='nsew')
+            # graph_selection_frame.grid_columnconfigure(0, weight=1)
+            # graph_selection_frame.grid_rowconfigure(0, weight=1)
+            # graph_selection_frame['style'] = 'Graph.TFrame'
+            # graph_selection_style = ttk.Style()
+            # graph_selection_style.configure("Graph.TFrame", background="lightblue")
+            # selected = tk.StringVar()
+            # graph_combobox = ttk.Combobox(graph_selection_frame, width=10, textvariable=selected)
+            # graph_combobox['values'] = ('1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12')
+            # graph_combobox.grid(column=0, row=0, pady=5, padx=5)
+            # graph_combobox.current(newindex=1)
 
             # Column 1, row 1 frame with current process name and id
             name_frame = ttk.Frame(process_container, width=150, height=250,
@@ -270,7 +270,9 @@ to change width of column drag boundary
 
             label_text = ''.join(web_data[0:-1])
             main_label = ttk.Label(text_frame, width=1000, text=label_text, padding=10, font=('Arial', 14),
-                                   justify='center', wraplength=1600)
+                                   justify='center')
+            main_label.config(wraplength=(main_label.winfo_width() - 10))
+            main_label.bind('<Configure>', lambda e: main_label.config(wraplength=(main_label.winfo_width() - 10)))
             main_label.grid(column=0, columnspan=6, row=1, in_=text_frame)
             main_label.grid_columnconfigure(0, weight=1)
             main_label['style'] = 'Webdata.TLabel'

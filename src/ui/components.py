@@ -1,8 +1,6 @@
-import tkinter as tk
 import tkinter.ttk as ttk
-import tkinter.font as tkfont
 
-from db.graphs import Graph
+from src.db.graphs import Graph
 
 
 class CreateWidgets:

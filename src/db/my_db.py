@@ -3,8 +3,7 @@ import os
 from dotenv import load_dotenv
 from sqlmodel import Session, SQLModel, create_engine, select, and_
 
-from db.models import LogHistory, Process, CurrentLog
-from db.pybites_timer import timing
+from src.db.models import LogHistory, Process, CurrentLog
 
 load_dotenv()
 

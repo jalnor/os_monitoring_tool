@@ -1,8 +1,8 @@
 import inspect
 import logging
 
-from util import file_logger as fl
-from util.file_logger import SaveMessage
+from src.util import file_logger as fl
+from src.util import SaveMessage
 
 
 HELLO = 'Hello World!'

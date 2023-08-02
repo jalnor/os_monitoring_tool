@@ -1,8 +1,9 @@
+import os
 import sys
 import tkinter as tk
 import tkinter.ttk as ttk
 
-from ui.all_processes_ui import AllProcesses
+from src.ui.all_processes_ui import AllProcesses
 
 
 def create_notebook(parent):
@@ -40,13 +41,23 @@ def destroyer():
 
 
 class MainUi:
-    """Create main window and start loop."""
-    root = tk.Tk()
-    root.geometry(f'{root.winfo_screenwidth()}x{root.winfo_screenheight()}')
-    root.title('OS Monitoring Tool')
-    root.protocol("WM_DELETE_WINDOW", destroyer)
-    menubar = create_menubar(root)
-    create_notebook(root)
-    root.configure(menu=menubar)
-    root.mainloop()
+    def __init__(self):
+        # self.new_process = new_process
+        self.create_window()
+
+    def create_window(self):
+        """Create main window and start loop."""
+        root = tk.Tk()
+        root.geometry(f'{root.winfo_screenwidth()}x{root.winfo_screenheight()}')
+        root.title('OS Monitoring Tool')
+        root.protocol("WM_DELETE_WINDOW", self.destroy_process)
+        root.protocol("WM_DELETE_WINDOW", destroyer)
+        # Commented out for packaging
+        # menubar = create_menubar(root)
+        create_notebook(root)
+        # root.configure(menu=menubar)
+        root.mainloop()
+
+    def destroy_process(self):
+        os.system('taskkill /F /PID' + self.new_process)
 

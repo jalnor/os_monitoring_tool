@@ -1,16 +1,14 @@
 import os
 import time
 from datetime import datetime
-from functools import wraps
 from typing import Optional
 
 import psutil
 from sqlmodel import create_engine, SQLModel, Session, select
 from dotenv import load_dotenv
 
-from db.models import Process, LogHistory, CurrentLog
-from db.pybites_timer import timing
-from util.file_logger import SaveMessage
+from src.db.models import Process, LogHistory, CurrentLog
+from src.util.file_logger import SaveMessage
 
 load_dotenv()
 
@@ -45,8 +43,8 @@ def get_os_processes():
 class ComputerProcesses:
     """Captures the running processes and saves or updates them in the database."""
 
-    def __init__(self):
-        self.db_url = os.environ["db_url"]
+    def __init__(self, db_url=None):
+        self.db_url = db_url or os.environ["db_url"]
         self.engine = create_engine(self.db_url, echo=False)
         self.create_db_and_tables()
         self.list_of_current_processes = []
@@ -60,7 +58,7 @@ class ComputerProcesses:
     def create_db_and_tables(self):
         SQLModel.metadata.create_all(self.engine)
 
-    def get_cached_processes(self):
+    def get_cached_processes(self) -> set:
         with Session(self.engine) as session:
             cached_processes = session.exec(
                 select(Process, CurrentLog).join(CurrentLog)
@@ -91,13 +89,80 @@ class ComputerProcesses:
             ).first()
             return logs
 
+    def add_processes_to_db(self, processes, session):
+        """Adds the current processes to the database for the first time"""
+        for os_process in processes:
+            try:
+                name = os_process.name()
+                process = self.get_process(name)
+
+                if not process:
+                    process = Process(
+                        name=name
+                    )
+                    session.add(process)
+                    session.commit()
+
+                current_log = create_current_log(process.id, os_process)
+                session.add(current_log)
+
+                log_history = create_log_history(process.id, os_process)
+                session.add(log_history)
+
+                session.commit()
+            except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess, psutil.Error):
+                # TODO: add logging later
+                print("could not retrieve process name, skip")
+                continue
+            except Exception as exc:
+                print('Could not retrieve name due to some unknown exception: ', exc)
+                continue
+
+    def update_existing_processes(self, dif, session):
+        for proc in dif:
+            current_log = self.get_log_entries_by_process_name_id(proc)
+            if current_log:
+                new_log_entry = LogHistory()
+
+                if current_log.status == 'running':
+                    new_date = datetime.now()
+                    new_log_entry.proc_id = current_log.proc_id
+                    new_log_entry.status = 'stopped'
+                    new_log_entry.started = current_log.started
+                    new_log_entry.captured = new_date
+                    new_log_entry.process_id = current_log.process_id
+                    session.add(new_log_entry)
+
+                    session.delete(current_log)
+
+                    session.commit()
+                else:
+                    # print('Deleting log entry: ', current_log)
+                    session.delete(current_log)
+
+                    session.commit()
+
+    def create_dif_set(self, os_processes, cached_processes, session):
+        os_name_set: set[tuple] = set()
+        for process in os_processes:
+            try:
+                os_name_set.add((process.name(), process.pid))
+            except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess, psutil.Error):
+                # TODO: add logging later
+                print("could not retrieve process name, skip")
+                continue
+            except Exception as exc:
+                print('Could not retrieve name due to some unknown exception: ', exc)
+                continue
+        dif = cached_processes.difference(os_name_set)
+        self.update_existing_processes(dif, session)
+
     # @timing
     def update_processes_in_db(self, cached_processes, os_processes):
         with Session(self.engine) as session:
             if cached_processes:
-                count = 0
+
                 for os_process in os_processes:
-                    # print('OS Process that should be current: ', os_process)
                     # more narrow exception: it seems .name() already hits the
                     # psutil exception, so in that case skip the rest
                     try:
@@ -155,7 +220,6 @@ class ComputerProcesses:
                             session.commit()
                             continue
 
-                        count += 1
                     except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess, psutil.Error):
                         # TODO: add logging later
                         print("could not retrieve process name, skip")
@@ -164,72 +228,13 @@ class ComputerProcesses:
                         print('Could not retrieve name due to some unknown exception: ', exc)
                         continue
             else:
-                for os_process in os_processes:
-                    # Add to db for first time only
-                    try:
-                        name = os_process.name()
-                        process = self.get_process(name)
-
-                        if not process:
-                            process = Process(
-                                name=name
-                            )
-                            session.add(process)
-                            session.commit()
-
-                        current_log = create_current_log(process.id, os_process)
-                        session.add(current_log)
-
-                        log_history = create_log_history(process.id, os_process)
-                        session.add(log_history)
-
-                        session.commit()
-                    except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess, psutil.Error):
-                        # TODO: add logging later
-                        print("could not retrieve process name, skip")
-                        continue
-                    except Exception as exc:
-                        print('Could not retrieve name due to some unknown exception: ', exc)
-                        continue
+                # Add to db for first time only
+                self.add_processes_to_db(os_processes, session)
 
             # Finally, check if any processes from db are not in os_processes,
             # then check status and update as necessary.
             # Get a set of names from os_processes, then find what db has that os_processes doesn't
-            os_name_set: set[tuple] = set()
-            for process in os_processes:
-                try:
-                    os_name_set.add((process.name(), process.pid))
-                except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess, psutil.Error):
-                    # TODO: add logging later
-                    print("could not retrieve process name, skip")
-                    continue
-                except Exception as exc:
-                    print('Could not retrieve name due to some unknown exception: ', exc)
-                    continue
-            dif = cached_processes.difference(os_name_set)
-            # reversed_dif = os_name_set.difference(cached_processes)
-            for proc in dif:
-                current_log = self.get_log_entries_by_process_name_id(proc)
-                if current_log:
-                    new_log_entry = LogHistory()
-
-                    if current_log.status == 'running':
-                        new_date = datetime.now()
-                        new_log_entry.proc_id = current_log.proc_id
-                        new_log_entry.status = 'stopped'
-                        new_log_entry.started = current_log.started
-                        new_log_entry.captured = new_date
-                        new_log_entry.process_id = current_log.process_id
-                        session.add(new_log_entry)
-
-                        session.delete(current_log)
-
-                        session.commit()
-                    else:
-                        # print('Deleting log entry: ', current_log)
-                        session.delete(current_log)
-
-                        session.commit()
+            self.create_dif_set(os_processes, cached_processes, session)
 
 
 if __name__ == "__main__":

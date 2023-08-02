@@ -1,6 +1,6 @@
 import pytest
 
-from db.models import Process, CurrentLog, LogHistory
+from src.db import Process, CurrentLog, LogHistory
 
 
 @pytest.fixture

@@ -1,6 +1,6 @@
 
 
-# OS Monitoring Tool ![python-powered-w-70x28](https://user-images.githubusercontent.com/31383711/190922610-d309b96e-318e-4e82-9b04-8eb2ab52938d.png)
+# OS Monitoring Tool ![python-powered-w-70x28](https://user-images.githubusercontent.com/31383711/190922610-d309b96e-318e-4e82-9b04-8eb2ab52938d.png)<img src=https://user-images.githubusercontent.com/31383711/204925379-fab28f16-81e4-4346-a1cb-cb7b0a999ac8.svg width=50 />
 ---
 
 A Python tool that monitors processes as they start and stop. It utilizes a separate subprocess to capture the current running processes, compares those to the database and adds the process or updates its status. It features graphs created with matplotlib and calls to an API for information about the process. OS Monitor Tool uses Tkinter for the GUI!

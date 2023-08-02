@@ -1,8 +1,6 @@
-import tkinter as tk
 import tkinter.ttk as ttk
-import tkinter.font as tkfont
 
-from db.graphs import Graph
+from src.db.graphs import Graph
 
 
 class CreateWidgets:
@@ -15,8 +13,9 @@ class CreateWidgets:
         print()
 
     # Need a frame def(parent, width, height, padding, borderwidth, relief)
-    def create_frame(self, parent, width, height, padding,
-                     borderwidth, relief, style) -> ttk.Frame:
+    def create_frame(self, parent, width: int, height: int, padding: int,
+                     borderwidth: int, relief: str, style: ttk.Style,
+                     grid: list[int], ) -> ttk.Frame:
         frame = ttk.Frame(parent, width=width, height=height,
                           padding=padding, borderwidth=borderwidth,
                           relief=relief, style=style)
@@ -24,7 +23,7 @@ class CreateWidgets:
         return frame
 
     # Grid and configure def(column, columnspan, row, rowspan, intial position, weight)
-    # def add_grid(self, component, column, columnspan,):
+    # def add_grid(self, component, column, columnspan, row, rowspan, sticky, columnconfigure, rowconfigure, weight):
     # Label def(parent, title, justification, grid(column, row,, sticky))
 
     # Tree def(columns=headers, show=headings, bind=event, grid(column, columnspan, row, rowspan, sticky, in=container it is in)

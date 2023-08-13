@@ -3,12 +3,15 @@ import os
 import requests
 
 
-def get_web_data(process_name, os_name):
+def get_web_data(process_name: str = "cmd", os_name: str = "nt") -> str:
     """Call external service for process information.
 
     Keyword arguments:
-    process_name -- the name of the process to obtain information on
-    os_name      -- the operating system used by caller
+    process_name    -- the name of the process to obtain information on
+    os_name         -- the operating system used by caller
+
+    Returns:
+    response        -- the response string
     """
     space_filler = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor " \
                "incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud " \

@@ -16,7 +16,7 @@ greenlet==3.0.3
     # via sqlalchemy
 idna==3.7
     # via requests
-pillow==9.5.0
+pillow==10.3.0
     # via tkhtmlview
 psutil==5.9.8
     # via os_monitoring_tool (setup.py)

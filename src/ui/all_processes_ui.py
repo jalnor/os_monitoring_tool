@@ -47,7 +47,9 @@ def adjust_column_headers(tree, item):
 class AllProcesses(object):
     """use a ttk.TreeView as a multicolumn ListBox"""
 
+
     def __init__(self, processes_container, notebook_parent):
+        basedir = 'c:\documents\pybites_pdm\OS_MONITORING_TOOL'
         self.os_name = os.name
         self.tree = None
         self.sorted: list = [self.tree, 'Capture Time', 1]
@@ -56,7 +58,7 @@ class AllProcesses(object):
         self.processes = []
         self._setup_widgets()
         self._build_tree()
-        self.db = my_db.MyDb()
+        self.db = my_db.MyDb(db_url=r'sqlite:///C:\Users\hal90\Documents\PyBites_PDM\projects\os_monitoring_tool\database.db')
         self.refresh_data()
         self.style = ttk.Style()
         self.select_os_theme()

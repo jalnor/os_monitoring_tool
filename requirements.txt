@@ -14,7 +14,7 @@ coverage==6.5.0
     # via os_monitoring_tool (setup.py)
 greenlet==3.0.3
     # via sqlalchemy
-idna==3.6
+idna==3.7
     # via requests
 pillow==9.5.0
     # via tkhtmlview
